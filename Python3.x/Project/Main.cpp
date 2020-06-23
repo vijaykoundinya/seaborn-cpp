@@ -1,15 +1,29 @@
-#include "D:\Programs\seaborn-cpp-master\seaborn-cpp-master\seaborn.h"
+#include "../Seaborn.h"
 #include <iostream>
 #include <conio.h>
+#include <map>
 
 using namespace std;
 
 int main()
 {
-	seaborn s;
-	s.loadDataSet("test1.csv");
-	s.relplot("total_bill","tip");
-	cout<<"\ndone\n";
+	//Initialise Seaborn
+	Seaborn s;
+	
+	//Pass CSV dataset path
+	bool ret = s.loadData("test1.csv");	
+	
+	//Replot
+	//https://seaborn.pydata.org/generated/seaborn.relplot.html#seaborn.relplot
+	//Create map to set fields
+	map<string, string> args;
+	args["hue"] = "day";
+	
+	bool rel = s.relplot("total_bill", "tip", args);
+		
+	//Save Graph
+	s.saveGraph("relplot");
+	
 	getch();
 	return 0;
 }
