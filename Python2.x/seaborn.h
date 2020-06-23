@@ -104,5 +104,9 @@ public:
 	    	return res;
 		return true;
 	}
+	bool scatterplot()
+	{
+		
+	}
 };
 
