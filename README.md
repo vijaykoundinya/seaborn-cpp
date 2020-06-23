@@ -8,7 +8,7 @@ Welcome to Seaborn-CPP, an attempt to create Seaborn as a C++ Library.
 * Pandas  
   
 ## Ubuntu  
-***TESTED ON PYTHON2.7 (Below Python3.2)***  
+***TESTED ON PYTHON2.7 (For Versions Below Python3.2)***  
   
 **To Compile:**  
 1) g++ filename.cpp -I/usr/lib/python2.7/Python.h -lpython2.7.  
