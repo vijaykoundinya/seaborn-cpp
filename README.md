@@ -1,6 +1,12 @@
 # Seaborn-cpp  
 Welcome to Seaborn-CPP, an attempt to create Seaborn as a C++ Library.  
   
+## Prerequisites  
+* Python  
+* Matplotlib  
+* Seaborn  
+* Pandas  
+  
 ## Ubuntu  
 ***TESTED ON PYTHON2.x***  
   
