@@ -13,11 +13,15 @@ int main()
 	//Pass CSV dataset path
 	bool ret = s.loadData("test1.csv");	
 	
-	//Replot
-	//https://seaborn.pydata.org/generated/seaborn.relplot.html#seaborn.relplot
-	//Create map to set fields
+	//Replot example
+	//The arguments are completely optional
 	map<string, string> args;
-	args["hue"] = "day";
+	args["hue"] = "time";
+	args["col"] = "day";
+	
+	s.setColWrap(2);
+	s.setHeight(5);
+	s.setAspect(0.7);
 	
 	bool rel = s.relplot("total_bill", "tip", args);
 		
