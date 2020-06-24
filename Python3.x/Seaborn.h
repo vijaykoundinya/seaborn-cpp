@@ -64,6 +64,20 @@ class Seaborn
 		}
 		
 		savefig = safe_import(matplotlibLib,"savefig");
+		
+		col_wrap = NULL;
+		row_order = NULL;
+		col_order = NULL;
+		palette = NULL;
+		hue_order = NULL;
+		hue_norm = NULL;
+		sizes = NULL;
+		size_order = NULL;
+		size_norm = NULL;
+		legend = NULL;
+		height = NULL;
+		aspect = NULL;
+		facet_kws = NULL;
 	}
 	
 	//Destructor
@@ -170,6 +184,94 @@ class Seaborn
 	}
 	
 	/*
+		This function is used to set value row_order in Relational Plots
+		
+		Parameters:
+		:rowOrder: string array - Order to organize the rows
+		:n: int - Length of array
+	*/
+	void setRowOrder(const string *rowOrder, const int n)
+	{
+		row_order = PyList_New(n);
+		for(int i=0; i<n; i++)
+	    {
+	        PyList_SetItem(row_order, i, PyUnicode_FromString(rowOrder[i].c_str()));
+	    }
+	}
+	
+	/*
+		This function is used to set value col_order in Relational Plots
+		
+		Parameters:
+		:colOrder: string array - Order to organize the columns
+		:n: int - Length of array
+	*/
+	void setColOrder(const string *colOrder, const int n)
+	{
+		col_order = PyList_New(n);
+		for(int i=0; i<n; i++)
+	    {
+	        PyList_SetItem(col_order, i, PyUnicode_FromString(colOrder[i].c_str()));
+	    }
+	}
+	
+	/*
+		This function is used to set value palette in Relational Plots
+		
+		Parameters:
+		:p: string array - Colors to use for the different levels of the hue variable
+		:n: int - Length of array
+	*/
+	void setPalette(const string *p, const int n)
+	{
+		palette = PyList_New(n);
+		for(int i=0; i<n; i++)
+	    {
+	        PyList_SetItem(palette, i, PyUnicode_FromString(p[i].c_str()));
+	    }
+	}
+	
+	/*
+		This function is used to set value hue_order in Relational Plots
+		
+		Parameters:
+		:h: string array - Colors to use for the different levels of the hue variable
+		:n: int - Length of array
+	*/
+	void setHueOrder(const string *h, const int n)
+	{
+		hue_order = PyList_New(n);
+		for(int i=0; i<n; i++)
+	    {
+	        PyList_SetItem(hue_order, i, PyUnicode_FromString(h[i].c_str()));
+	    }
+	}
+	
+	/*
+		This function is used to set value hue_norm in Relational Plots
+		
+		Parameters:
+		:h: long int array - Normalization in data units for colormap applied to the hue variable when it is numeric
+		:n: int - Length of array
+	*/
+	void setHueNorm(const long int *h, const int n)
+	{
+		hue_norm = PyTuple_New(n);
+		for(int i=0; i<n; i++)
+	    {
+	        PyTuple_SetItem(hue_norm, i, PyLong_FromLong(h[i]));
+	    }
+	}
+	
+	/*
+		This function is used to set value legend to false in Relational Plots
+	*/
+	void setLegendFalse()
+	{
+		legend = Py_False;
+	}
+	
+	/*
 		This function is used to draw relational plots
 		The dataset should be loaded through the loadData() function
 		String arguments can be passed through the map<string, string>
@@ -217,6 +319,36 @@ class Seaborn
 		if(aspect)
 	    {
 	    	PyDict_SetItemString(kwargs, "aspect", aspect);
+		}
+		
+		if(row_order)
+	    {
+	    	PyDict_SetItemString(kwargs, "row_order", row_order);
+		}
+		
+		if(col_order)
+	    {
+	    	PyDict_SetItemString(kwargs, "col_order", col_order);
+		}
+		
+		if(palette)
+	    {
+	    	PyDict_SetItemString(kwargs, "palette", palette);
+		}
+		
+		if(hue_order)
+	    {
+	    	PyDict_SetItemString(kwargs, "hue_order", hue_order);
+		}
+		
+		if(hue_norm)
+	    {
+	    	PyDict_SetItemString(kwargs, "hue_norm", hue_norm);
+		}
+		
+		if(legend)
+	    {
+	    	PyDict_SetItemString(kwargs, "legend", legend);
 		}
 		
 		PyObject* res = PyObject_Call(pyrelplot, args, kwargs);
