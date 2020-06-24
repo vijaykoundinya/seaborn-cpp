@@ -1,8 +1,14 @@
 # Seaborn-cpp  
 Welcome to Seaborn-CPP, an attempt to create Seaborn as a C++ Library.  
   
+## Prerequisites  
+* Python  
+* Matplotlib  
+* Seaborn  
+* Pandas  
+  
 ## Ubuntu  
-***TESTED ON PYTHON2.x***  
+***TESTED ON PYTHON2.7 (For Versions Below Python3.2)***  
   
 **To Compile:**  
 1) g++ filename.cpp -I/usr/lib/python2.7/Python.h -lpython2.7.  
@@ -10,7 +16,7 @@ Welcome to Seaborn-CPP, an attempt to create Seaborn as a C++ Library.
   
   
 ## Windows  
-***TESTED ON PYTHON3.x***  
+***TESTED ON PYTHON3.6 (Python3.2+)***  
 
 **To Compile:**  
 1) Add Python3.x Lib folder path to Libraries.  
