@@ -11,26 +11,119 @@
 
 using namespace std;
 
+class Storage
+{
+	int n;
+	double i;
+	string s;
+	bool b;
+	double *li;
+	string *sa;
+	
+	string val;
+		
+	public:
+		
+		void setDouble(double i)
+		{
+			this->i = i;
+			val = "int";
+			
+			s = "";
+			b = false;
+			li = new double[1];
+			sa = new string[1];
+		}
+			
+		void setString(string s)
+		{
+			this->s = s;
+			val = "str";
+			
+			i = 0;
+			b = false;
+			li = new double[1];
+			sa = new string[1];
+		}
+		
+		void setBool(bool b)
+		{
+			this->b = b;
+			val = "bool";
+			
+			i = 0;
+			s = "";
+			li = new double[1];
+			sa = new string[1];
+		}
+		
+		void setDoubleArray(double *li, int n)
+		{
+			this->li = new double[n];
+			copy(li, li + n, this->li);
+			val = "intarr";
+			this->n = n;
+			
+			i = 0;
+			s = "";
+			b = false;
+			sa = new string[1];
+		}
+		
+		void setStringArray(string *sa, int n)
+		{
+			this->sa = new string[n];
+			copy(sa, sa + n, this->sa);
+			val = "strarr";
+			this->n = n;
+			
+			i = 0;
+			s = "";
+			b = false;
+			li = new double[1];
+		}
+		
+		int getN() const
+		{
+			return n;
+		}
+		
+		double getDouble() const
+		{
+			return i;
+		}
+		
+		string getString() const
+		{
+			return s;
+		}
+		
+		bool getBool() const
+		{
+			return b;
+		}
+		
+		double* getDoubleArray() const
+		{
+			return li;
+		}
+		
+		string* getStringArray() const
+		{
+			return sa;
+		}
+		
+		string getVal() const
+		{
+			return val;
+		}
+};
+
 class Seaborn
 {
 	PyObject* seabornLib;
 	PyObject* dataset;
 	PyObject* savefig;
-	
-	//Relational Plot Argument Variables
-	PyObject* col_wrap;
-	PyObject* row_order;
-	PyObject* col_order;
-	PyObject* palette;
-	PyObject* hue_order;
-	PyObject* hue_norm;
-	PyObject* sizes;
-	PyObject* size_order;
-	PyObject* size_norm;
-	PyObject* legend;
-	PyObject* height;
-	PyObject* aspect;
-	PyObject* facet_kws;
 	
 	//This function is used to import subfunctions of a header
 	PyObject* safe_import(PyObject* lib, const string fn)
@@ -64,20 +157,6 @@ class Seaborn
 		}
 		
 		savefig = safe_import(matplotlibLib,"savefig");
-		
-		col_wrap = NULL;
-		row_order = NULL;
-		col_order = NULL;
-		palette = NULL;
-		hue_order = NULL;
-		hue_norm = NULL;
-		sizes = NULL;
-		size_order = NULL;
-		size_norm = NULL;
-		legend = NULL;
-		height = NULL;
-		aspect = NULL;
-		facet_kws = NULL;
 	}
 	
 	//Destructor
@@ -149,133 +228,8 @@ class Seaborn
 	//https://seaborn.pydata.org/generated/seaborn.relplot.html#seaborn.relplot
 	
 	/*
-		This function is used to set value col_wrap in Relational Plots
-		
-		Parameters:
-		:colwrap: long int - Width to wrap wrap the column
-		
-		NOTE: The variable 'col' needs to be set for col_wrap to work 
-	*/
-	void setColWrap(const long int colwrap)
-	{
-		col_wrap = PyLong_FromLong(colwrap);
-	}
-	
-	/*
-		This function is used to set value height in Relational Plots
-		
-		Parameters:
-		:h: double - Height (in inches) of each facet
-	*/
-	void setHeight(const double h)
-	{
-		height = PyFloat_FromDouble(h);
-	}
-	
-	/*
-		This function is used to set value aspect in Relational Plots
-		
-		Parameters:
-		:a: double - Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches
-	*/
-	void setAspect(const double a)
-	{
-		aspect = PyFloat_FromDouble(a);
-	}
-	
-	/*
-		This function is used to set value row_order in Relational Plots
-		
-		Parameters:
-		:rowOrder: string array - Order to organize the rows
-		:n: int - Length of array
-	*/
-	void setRowOrder(const string *rowOrder, const int n)
-	{
-		row_order = PyList_New(n);
-		for(int i=0; i<n; i++)
-	    {
-	        PyList_SetItem(row_order, i, PyUnicode_FromString(rowOrder[i].c_str()));
-	    }
-	}
-	
-	/*
-		This function is used to set value col_order in Relational Plots
-		
-		Parameters:
-		:colOrder: string array - Order to organize the columns
-		:n: int - Length of array
-	*/
-	void setColOrder(const string *colOrder, const int n)
-	{
-		col_order = PyList_New(n);
-		for(int i=0; i<n; i++)
-	    {
-	        PyList_SetItem(col_order, i, PyUnicode_FromString(colOrder[i].c_str()));
-	    }
-	}
-	
-	/*
-		This function is used to set value palette in Relational Plots
-		
-		Parameters:
-		:p: string array - Colors to use for the different levels of the hue variable
-		:n: int - Length of array
-	*/
-	void setPalette(const string *p, const int n)
-	{
-		palette = PyList_New(n);
-		for(int i=0; i<n; i++)
-	    {
-	        PyList_SetItem(palette, i, PyUnicode_FromString(p[i].c_str()));
-	    }
-	}
-	
-	/*
-		This function is used to set value hue_order in Relational Plots
-		
-		Parameters:
-		:h: string array - Colors to use for the different levels of the hue variable
-		:n: int - Length of array
-	*/
-	void setHueOrder(const string *h, const int n)
-	{
-		hue_order = PyList_New(n);
-		for(int i=0; i<n; i++)
-	    {
-	        PyList_SetItem(hue_order, i, PyUnicode_FromString(h[i].c_str()));
-	    }
-	}
-	
-	/*
-		This function is used to set value hue_norm in Relational Plots
-		
-		Parameters:
-		:h: long int array - Normalization in data units for colormap applied to the hue variable when it is numeric
-		:n: int - Length of array
-	*/
-	void setHueNorm(const long int *h, const int n)
-	{
-		hue_norm = PyTuple_New(n);
-		for(int i=0; i<n; i++)
-	    {
-	        PyTuple_SetItem(hue_norm, i, PyLong_FromLong(h[i]));
-	    }
-	}
-	
-	/*
-		This function is used to set value legend to false in Relational Plots
-	*/
-	void setLegendFalse()
-	{
-		legend = Py_False;
-	}
-	
-	/*
 		This function is used to draw relational plots
 		The dataset should be loaded through the loadData() function
-		String arguments can be passed through the map<string, string>
-		Other arguments have to be set manually through setter functions
 		
 		Parameters:
 		:x: string - Column Name in dataset - Must be numeric
@@ -284,7 +238,7 @@ class Seaborn
 		
     	:return: bool - Result of operation (Success or Failure)
 	*/
-	bool relplot(const string x, const string y, const map<string, string>& keywords)
+	bool relplot(const string x, const string y, const map<string, Storage>& keywords)
 	{
 		PyObject* pyrelplot = safe_import(seabornLib,"relplot");
 		
@@ -293,9 +247,45 @@ class Seaborn
 		PyTuple_SetItem(args, 1, PyUnicode_FromString(y.c_str()));
 		
 		PyObject* kwargs = PyDict_New();
-		for(map<string, string>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
 	    {
-	        PyDict_SetItemString(kwargs, it->first.c_str(), PyUnicode_FromString(it->second.c_str()));
+	    	PyObject* tmp;
+	    	if(it->second.getVal().compare("str") == 0)
+	    	{
+	    		tmp = PyUnicode_FromString(it->second.getString().c_str());
+			}
+			else if(it->second.getVal().compare("int") == 0)
+	    	{
+	    		tmp = PyFloat_FromDouble(it->second.getDouble());
+			}
+			else if(it->second.getVal().compare("bool") == 0)
+	    	{
+	    		if(!it->second.getBool())
+	    			tmp = Py_False;
+	    		else
+	    			tmp = Py_True;
+			}
+			else if(it->second.getVal().compare("intarr") == 0)
+	    	{
+	    		int n = it->second.getN();
+	    		double* t = it->second.getDoubleArray();
+	    		tmp = PyTuple_New(n);
+				for(int i=0; i<n; i++)
+			    {
+			        PyTuple_SetItem(tmp, i, PyFloat_FromDouble(t[i]));
+			    }
+			}
+			else if(it->second.getVal().compare("strarr") == 0)
+	    	{
+	    		int n = it->second.getN();
+	    		string* t = it->second.getStringArray();
+	    		tmp = PyList_New(n);
+				for(int i=0; i<n; i++)
+			    {
+			        PyList_SetItem(tmp, i, PyUnicode_FromString(t[i].c_str()));
+			    }
+			}
+	        PyDict_SetItemString(kwargs, it->first.c_str(), tmp);
 	    }
 	    
 	    if(!dataset)
@@ -305,51 +295,6 @@ class Seaborn
 		}
 		
 	    PyDict_SetItemString(kwargs, "data", dataset);
-	    
-	    if(col_wrap)
-	    {
-	    	PyDict_SetItemString(kwargs, "col_wrap", col_wrap);
-		}
-		
-		if(height)
-	    {
-	    	PyDict_SetItemString(kwargs, "height", height);
-		}
-		
-		if(aspect)
-	    {
-	    	PyDict_SetItemString(kwargs, "aspect", aspect);
-		}
-		
-		if(row_order)
-	    {
-	    	PyDict_SetItemString(kwargs, "row_order", row_order);
-		}
-		
-		if(col_order)
-	    {
-	    	PyDict_SetItemString(kwargs, "col_order", col_order);
-		}
-		
-		if(palette)
-	    {
-	    	PyDict_SetItemString(kwargs, "palette", palette);
-		}
-		
-		if(hue_order)
-	    {
-	    	PyDict_SetItemString(kwargs, "hue_order", hue_order);
-		}
-		
-		if(hue_norm)
-	    {
-	    	PyDict_SetItemString(kwargs, "hue_norm", hue_norm);
-		}
-		
-		if(legend)
-	    {
-	    	PyDict_SetItemString(kwargs, "legend", legend);
-		}
 		
 		PyObject* res = PyObject_Call(pyrelplot, args, kwargs);
 		if(!res)

@@ -9,25 +9,32 @@ int main()
 {
 	//Initialise Seaborn
 	Seaborn s;
+	Storage store;
 	
 	//Pass CSV dataset path
 	bool ret = s.loadData("test1.csv");	
 	
 	//Replot example
 	//The arguments are completely optional
-	map<string, string> args;
-	args["hue"] = "time";
-	args["row"] = "day";
+	map<string, Storage> args;
+	store.setString("time");
+	args["hue"] = store;
 	
-	//s.setColWrap(2);
+	store.setString("day");
 	
-	//s.setHeight(5);
+	args["row"] = store;
 	
-	//s.setAspect(0.7);
+	//store.setDouble(2);
+	//args["col_wrap"] = store;
+		
+	store.setDouble(0.7);
+	args["aspect"] = store;
 	
 	string rowOrder[4] = { "Fri", "Sun", "Thur", "Sat" };
-	s.setRowOrder(rowOrder, 4);
+	store.setStringArray(rowOrder, 4);
+	args["row_order"] = store;
 	
+	//Call function relplot with x, y and arguments (args is optional)
 	bool rel = s.relplot("total_bill", "tip", args);
 		
 	//Save Graph
