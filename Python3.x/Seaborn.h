@@ -83,6 +83,17 @@ class Storage
 			li = new double[1];
 		}
 		
+		void setFunctionName(string s)
+		{
+			this->s = s;
+			val = "func";
+			
+			i = 0;
+			b = false;
+			li = new double[1];
+			sa = new string[1];
+		}
+		
 		int getN() const
 		{
 			return n;
@@ -284,6 +295,15 @@ class Seaborn
 			    {
 			        PyList_SetItem(tmp, i, PyUnicode_FromString(t[i].c_str()));
 			    }
+			}
+			else if(it->second.getVal().compare("func") == 0)
+	    	{
+	    		PyObject* functionName = PyUnicode_FromString(it->second.getString().c_str());
+				tmp = PyImport_Import(functionName);
+				if(!tmp)
+				{
+					PyErr_Print();
+				}
 			}
 	        PyDict_SetItemString(kwargs, it->first.c_str(), tmp);
 	    }
