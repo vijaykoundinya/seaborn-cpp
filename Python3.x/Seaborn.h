@@ -19,6 +19,7 @@ class Storage
 	bool b;
 	double *li;
 	string *sa;
+	map<string, Storage> m;
 	
 	string val;
 		
@@ -94,6 +95,18 @@ class Storage
 			sa = new string[1];
 		}
 		
+		void setkwargs(string str, map<string, Storage> m)
+		{
+			this->m = m;
+			val = "kwargs";
+			
+			i = 0;
+			s = "";
+			b = false;
+			li = new double[1];
+			sa = new string[1];
+		}
+		
 		int getN() const
 		{
 			return n;
@@ -122,6 +135,11 @@ class Storage
 		string* getStringArray() const
 		{
 			return sa;
+		}
+		
+		map<string, Storage> getkwargs() const
+		{
+			return m;
 		}
 		
 		string getVal() const
@@ -238,6 +256,67 @@ class Seaborn
 	//RELATIONAL PLOTS
 	//https://seaborn.pydata.org/generated/seaborn.relplot.html#seaborn.relplot
 	
+	PyObject* getArgData(Storage store)
+	{
+		PyObject* tmp;
+		if(store.getVal().compare("str") == 0)
+    	{
+    		tmp = PyUnicode_FromString(store.getString().c_str());
+		}
+		else if(store.getVal().compare("int") == 0)
+    	{
+    		tmp = PyFloat_FromDouble(store.getDouble());
+		}
+		else if(store.getVal().compare("bool") == 0)
+    	{
+    		if(!store.getBool())
+    			tmp = Py_False;
+    		else
+    			tmp = Py_True;
+		}
+		else if(store.getVal().compare("intarr") == 0)
+    	{
+    		int n = store.getN();
+    		double* t = store.getDoubleArray();
+    		tmp = PyTuple_New(n);
+			for(int i=0; i<n; i++)
+		    {
+		        PyTuple_SetItem(tmp, i, PyFloat_FromDouble(t[i]));
+		    }
+		}
+		else if(store.getVal().compare("strarr") == 0)
+    	{
+    		int n = store.getN();
+    		string* t = store.getStringArray();
+    		tmp = PyList_New(n);
+			for(int i=0; i<n; i++)
+		    {
+		        PyList_SetItem(tmp, i, PyUnicode_FromString(t[i].c_str()));
+		    }
+		}
+		else if(store.getVal().compare("func") == 0)
+    	{
+    		PyObject* functionName = PyUnicode_FromString(store.getString().c_str());
+			tmp = PyImport_Import(functionName);
+			if(!tmp)
+			{
+				PyErr_Print();
+			}
+		}
+		else if(store.getVal().compare("kwargs") == 0)
+    	{
+    		tmp = PyDict_New();
+    		map<string, Storage> val = store.getkwargs();
+    		for(map<string, Storage>::const_iterator i = val.begin(); i != val.end(); ++i)
+		    {
+		    	PyObject* tmp = getArgData(i->second);
+		        PyDict_SetItemString(tmp, i->first.c_str(), tmp);
+		    }
+		}
+		
+		return tmp;
+	}
+	
 	/*
 		This function is used to draw relational plots
 		The dataset should be loaded through the loadData() function
@@ -249,7 +328,7 @@ class Seaborn
 		
     	:return: bool - Result of operation (Success or Failure)
 	*/
-	bool relplot(const string x, const string y, const map<string, Storage>& keywords)
+	bool relplot(const string x, const string y, const map<string, Storage>& keywords = map<string, Storage>())
 	{
 		PyObject* pyrelplot = safe_import(seabornLib,"relplot");
 		
@@ -260,52 +339,8 @@ class Seaborn
 		PyObject* kwargs = PyDict_New();
 		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
 	    {
-	    	PyObject* tmp;
-	    	if(it->second.getVal().compare("str") == 0)
-	    	{
-	    		tmp = PyUnicode_FromString(it->second.getString().c_str());
-			}
-			else if(it->second.getVal().compare("int") == 0)
-	    	{
-	    		tmp = PyFloat_FromDouble(it->second.getDouble());
-			}
-			else if(it->second.getVal().compare("bool") == 0)
-	    	{
-	    		if(!it->second.getBool())
-	    			tmp = Py_False;
-	    		else
-	    			tmp = Py_True;
-			}
-			else if(it->second.getVal().compare("intarr") == 0)
-	    	{
-	    		int n = it->second.getN();
-	    		double* t = it->second.getDoubleArray();
-	    		tmp = PyTuple_New(n);
-				for(int i=0; i<n; i++)
-			    {
-			        PyTuple_SetItem(tmp, i, PyFloat_FromDouble(t[i]));
-			    }
-			}
-			else if(it->second.getVal().compare("strarr") == 0)
-	    	{
-	    		int n = it->second.getN();
-	    		string* t = it->second.getStringArray();
-	    		tmp = PyList_New(n);
-				for(int i=0; i<n; i++)
-			    {
-			        PyList_SetItem(tmp, i, PyUnicode_FromString(t[i].c_str()));
-			    }
-			}
-			else if(it->second.getVal().compare("func") == 0)
-	    	{
-	    		PyObject* functionName = PyUnicode_FromString(it->second.getString().c_str());
-				tmp = PyImport_Import(functionName);
-				if(!tmp)
-				{
-					PyErr_Print();
-				}
-			}
-	        PyDict_SetItemString(kwargs, it->first.c_str(), tmp);
+	    	PyObject* data = getArgData(it->second);	
+	        PyDict_SetItemString(kwargs, it->first.c_str(), data);
 	    }
 	    
 	    if(!dataset)
