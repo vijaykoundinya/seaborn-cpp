@@ -5,14 +5,10 @@
 
 using namespace std;
 
-int main()
+void relplotExample(Seaborn &s, Storage &store)
 {
-	//Initialise Seaborn
-	Seaborn s;
-	Storage store;
-	
 	//Pass CSV dataset path
-	bool ret = s.loadData("test1.csv");	
+	bool ret = s.loadData("test.csv");
 	
 	//Replot example
 	//The arguments are completely optional
@@ -39,6 +35,47 @@ int main()
 		
 	//Save Graph
 	s.saveGraph("relplot");
+}
+
+void catplotExample(Seaborn &s, Storage &store)
+{
+	//Pass CSV dataset path
+	bool ret = s.loadData("exercise.csv");
+	
+	//Catplot example
+	//The arguments are completely optional
+	map<string, Storage> args;
+	store.setString("kind");
+	args["hue"] = store;
+	
+	//store.setDouble(2);
+	//args["col_wrap"] = store;
+		
+	store.setDouble(0.7);
+	args["aspect"] = store;
+	
+	store.setString("violin");
+	args["kind"] = store;
+	
+	store.setFunctionName("numpy.mean");
+	args["estimator"] = store;
+		
+	//Call function catplot with x, y and arguments (args is optional)
+	bool rel = s.catplot("time", "pulse", args);
+		
+	//Save Graph
+	s.saveGraph("catplot");
+}
+
+int main()
+{
+	//Initialise Seaborn
+	Seaborn s;
+	Storage store;
+	
+	relplotExample(s, store);
+	
+	catplotExample(s, store);
 	
 	getch();
 	return 0;

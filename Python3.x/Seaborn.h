@@ -152,7 +152,9 @@ class Seaborn
 {
 	PyObject* seabornLib;
 	PyObject* dataset;
+	PyObject* pandas;
 	PyObject* savefig;
+	PyObject* readCsv;
 	
 	//This function is used to import subfunctions of a header
 	PyObject* safe_import(PyObject* lib, const string fn)
@@ -205,12 +207,17 @@ class Seaborn
 		}
 		else if(store.getVal().compare("func") == 0)
 		{
-			PyObject* functionName = PyUnicode_FromString(store.getString().c_str());
-			tmp = PyImport_Import(functionName);
-			if(!tmp)
+			string s = store.getString();
+			int pos = s.find_last_of(".");
+			string module = s.substr(0,pos);
+			string funcName = s.substr(pos+1,s.length()-1);
+    		PyObject* functionName = PyUnicode_FromString(module.c_str());
+			PyObject* tmp1 = PyImport_Import(functionName);
+			if(!tmp1)
 			{
 				PyErr_Print();
 			}
+			tmp = safe_import(tmp1,funcName);
 		}
 		else if(store.getVal().compare("kwargs") == 0)
 		{
@@ -246,7 +253,16 @@ class Seaborn
 			PyErr_Print();
 		}
 		
-		savefig = safe_import(matplotlibLib,"savefig");
+		PyObject* pandasName = PyUnicode_FromString("pandas");
+		pandas = PyImport_Import(pandasName);
+		if(!pandas)
+		{
+			PyErr_Print();
+		}
+		
+		savefig = safe_import(matplotlibLib, "savefig");
+		
+		readCsv = safe_import(pandas, "read_csv");
 	}
 	
 	//Destructor
@@ -264,18 +280,12 @@ class Seaborn
     	:return: bool - Result of operation (Success or Failure)
 	*/
 	bool loadData(string s)
-	{
-		PyObject* pandasName = PyUnicode_FromString("pandas");
-		PyObject* pandas = PyImport_Import(pandasName);
-		if(!pandas)
-		{
-			PyErr_Print();
-		}
-		
+	{		
 		PyObject* pystring = PyTuple_New(1);
-		PyTuple_SetItem(pystring,0,PyUnicode_FromString(s.c_str()));
-		PyObject* readCsv = safe_import(pandas,"read_csv");
-		dataset = PyObject_CallObject(readCsv,pystring);
+		PyTuple_SetItem(pystring, 0, PyUnicode_FromString(s.c_str()));
+
+		dataset = PyObject_CallObject(readCsv, pystring);
+		
 		if(!dataset)
 		{
 			PyErr_Print();
@@ -304,7 +314,7 @@ class Seaborn
 	{
 		PyObject* pystring = PyTuple_New(1);
 		PyTuple_SetItem(pystring, 0, PyUnicode_FromString(s.c_str()));
-		PyObject* res = PyObject_CallObject(savefig,pystring);
+		PyObject* res = PyObject_CallObject(savefig, pystring);
 		if(!res)
 		{
 			PyErr_Print();
@@ -387,8 +397,7 @@ class Seaborn
 	*/
 	bool catplot(const string x,const string y,const map<string, Storage>& keywords = map<string, Storage>())
 	{
-
-		PyObject* pycatplot= safe_import(seabornLib,"catplot");
+		PyObject* pycatplot= safe_import(seabornLib, "catplot");
 		PyObject* args = PyTuple_New(2);
 		PyTuple_SetItem(args, 0, PyUnicode_FromString(x.c_str()));
 		PyTuple_SetItem(args, 1, PyUnicode_FromString(y.c_str()));
@@ -401,11 +410,11 @@ class Seaborn
 		}
 		
 		PyDict_SetItemString(kwargs, "data", dataset);
-		
+				
 		if(!dataset)
-	    	{
-	    		cout<<"\nDataset not loaded\n";
-	    		return false;
+	    {
+    		cout<<"\nDataset not loaded\n";
+    		return false;
 		}
 			
 		PyObject* res = PyObject_Call(pycatplot, args, kwargs);
