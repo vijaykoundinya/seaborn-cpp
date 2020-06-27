@@ -4,19 +4,39 @@
 using namespace std;
 int main()
 {
-	//Initialize seaborn object
+	//Initialise Seaborn
 	seaborn s;
+	Storage store;
 	
-	//Loads dataset
-	s.loadDataSet("test1.csv");
-
-	//defines relplot parameters
-	map<string, string> args;
-	args["hue"] = "day";
-
-	//saves graph in the same folders
-	bool x = s.relplot("total_bill", "tip", args);
-	s.saveGraph("relpolt");
+	//Pass CSV dataset path
+	bool ret = s.loadData("test1.csv");	
+	
+	//Replot example
+	//The arguments are completely optional
+	map<string, Storage> args;
+	store.setString("time");
+	args["hue"] = store;
+	
+	store.setString("day");
+	
+	args["row"] = store;
+	
+	//store.setDouble(2);
+	//args["col_wrap"] = store;
+		
+	store.setDouble(0.7);
+	args["aspect"] = store;
+	
+	string rowOrder[4] = { "Fri", "Sun", "Thur", "Sat" };
+	store.setStringArray(rowOrder, 4);
+	args["row_order"] = store;
+	
+	//Call function relplot with x, y and arguments (args is optional)
+	bool rel = s.relplot("total_bill", "tip", args);
+		
+	//Save Graph
+	s.saveGraph("relplot");
+	
+	//getch();
 	return 0;
-
 }
