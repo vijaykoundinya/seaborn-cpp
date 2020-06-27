@@ -152,6 +152,8 @@ class seaborn
 	PyObject* seabornLib;
 	PyObject* dataset;
 	PyObject* savefig;
+	PyObject* pandas;
+	PyObject* readCsv;
 	PyObject* safe_import(PyObject* lib,const string fn)
 	{
 	//Imports Function Object
@@ -245,6 +247,13 @@ public:
 			PyErr_Print();
 		}
 		savefig = safe_import(matplotlibLib,"savefig");
+		PyObject* pandasName = PyString_FromString("pandas");
+		pandas = PyImport_Import(pandasName);
+		if(!pandas)
+		{
+			PyErr_Print();
+		}
+		readCsv = safe_import(pandas,"read_csv");
 
 	}
 	~seaborn()
@@ -262,15 +271,8 @@ public:
 
 	bool loadData(string s)
 	{
-		PyObject* pandasName = PyString_FromString("pandas");
-		PyObject* pandas = PyImport_Import(pandasName);
-		if(!pandas)
-		{
-			PyErr_Print();
-		}
 		PyObject* pystring = PyTuple_New(1);
 		PyTuple_SetItem(pystring,0,PyString_FromString(s.c_str()));
-		PyObject* readCsv = safe_import(pandas,"read_csv");
 		dataset = PyObject_CallObject(readCsv,pystring);
 		if(!dataset)
 		{
@@ -367,9 +369,9 @@ public:
 	
 	
 	/*
-		This function is used to draw relational plots
+		This function is used to draw categorical plots
 		The dataset should be loaded through the loadData() function
-		String arguments can be passed through the map<string, string>
+		String arguments can be passed through the map<string, Storage>
 		Other arguments have to be set manually through setter functions
 		
 		Parameters:

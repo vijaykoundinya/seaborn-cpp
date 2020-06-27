@@ -410,7 +410,7 @@ class Seaborn
 		PyObject* res = PyObject_Call(pycatplot, args, kwargs);
 		if(!res)
 			PyErr_Print();
-		else
+
 				
 		Py_DECREF(args);
 	    	Py_DECREF(kwargs);
