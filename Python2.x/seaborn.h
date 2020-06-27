@@ -147,7 +147,7 @@ class Storage
 			return val;
 		}
 };
-class seaborn
+class Seaborn
 {
 	PyObject* seabornLib;
 	PyObject* dataset;
@@ -231,7 +231,7 @@ class seaborn
 	}
 
 public:
-	seaborn()
+	Seaborn()
 	{
 		Py_Initialize();
 		PyObject* seabornName = PyString_FromString("seaborn");
@@ -256,7 +256,7 @@ public:
 		readCsv = safe_import(pandas,"read_csv");
 
 	}
-	~seaborn()
+	~Seaborn()
 	{	
 		Py_Finalize();
 	}
