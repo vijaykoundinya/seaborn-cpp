@@ -164,6 +164,66 @@ class Seaborn
 			throw std::runtime_error(fn);
 		return fname;	
 	}
+	PyObject* getArgData(Storage store)
+	{
+		PyObject* tmp;
+		if(store.getVal().compare("str") == 0)
+    		{	
+    			tmp = PyUnicode_FromString(store.getString().c_str());
+		}
+		else if(store.getVal().compare("int") == 0)
+    		{
+    			tmp = PyFloat_FromDouble(store.getDouble());
+		}
+		else if(store.getVal().compare("bool") == 0)
+    		{
+    			if(!store.getBool())
+    				tmp = Py_False;
+    			else
+    				tmp = Py_True;
+		}
+		else if(store.getVal().compare("intarr") == 0)
+    		{
+    			int n = store.getN();
+    			double* t = store.getDoubleArray();
+    			tmp = PyTuple_New(n);
+			for(int i=0; i<n; i++)
+			{
+		        	PyTuple_SetItem(tmp, i, PyFloat_FromDouble(t[i]));
+		        }
+		}
+		else if(store.getVal().compare("strarr") == 0)
+    		{
+    			int n = store.getN();
+    			string* t = store.getStringArray();
+    			tmp = PyList_New(n);
+			for(int i=0; i<n; i++)
+	       	        {
+		        	PyList_SetItem(tmp, i, PyUnicode_FromString(t[i].c_str()));
+		    	}
+		}
+		else if(store.getVal().compare("func") == 0)
+    		{
+    			PyObject* functionName = PyUnicode_FromString(store.getString().c_str());
+			tmp = PyImport_Import(functionName);
+			if(!tmp)
+			{
+				PyErr_Print();
+			}
+		}
+		else if(store.getVal().compare("kwargs") == 0)
+    		{
+    			tmp = PyDict_New();
+    			map<string, Storage> val = store.getkwargs();
+    			for(map<string, Storage>::const_iterator i = val.begin(); i != val.end(); ++i)
+		        {
+		    		PyObject* tmp = getArgData(i->second);
+		        	PyDict_SetItemString(tmp, i->first.c_str(), tmp);
+		        }
+		}
+		
+		return tmp;
+	}
 	
 	public:
 	
@@ -256,66 +316,6 @@ class Seaborn
 	//RELATIONAL PLOTS
 	//https://seaborn.pydata.org/generated/seaborn.relplot.html#seaborn.relplot
 	
-	PyObject* getArgData(Storage store)
-	{
-		PyObject* tmp;
-		if(store.getVal().compare("str") == 0)
-    	{
-    		tmp = PyUnicode_FromString(store.getString().c_str());
-		}
-		else if(store.getVal().compare("int") == 0)
-    	{
-    		tmp = PyFloat_FromDouble(store.getDouble());
-		}
-		else if(store.getVal().compare("bool") == 0)
-    	{
-    		if(!store.getBool())
-    			tmp = Py_False;
-    		else
-    			tmp = Py_True;
-		}
-		else if(store.getVal().compare("intarr") == 0)
-    	{
-    		int n = store.getN();
-    		double* t = store.getDoubleArray();
-    		tmp = PyTuple_New(n);
-			for(int i=0; i<n; i++)
-		    {
-		        PyTuple_SetItem(tmp, i, PyFloat_FromDouble(t[i]));
-		    }
-		}
-		else if(store.getVal().compare("strarr") == 0)
-    	{
-    		int n = store.getN();
-    		string* t = store.getStringArray();
-    		tmp = PyList_New(n);
-			for(int i=0; i<n; i++)
-		    {
-		        PyList_SetItem(tmp, i, PyUnicode_FromString(t[i].c_str()));
-		    }
-		}
-		else if(store.getVal().compare("func") == 0)
-    	{
-    		PyObject* functionName = PyUnicode_FromString(store.getString().c_str());
-			tmp = PyImport_Import(functionName);
-			if(!tmp)
-			{
-				PyErr_Print();
-			}
-		}
-		else if(store.getVal().compare("kwargs") == 0)
-    	{
-    		tmp = PyDict_New();
-    		map<string, Storage> val = store.getkwargs();
-    		for(map<string, Storage>::const_iterator i = val.begin(); i != val.end(); ++i)
-		    {
-		    	PyObject* tmp = getArgData(i->second);
-		        PyDict_SetItemString(tmp, i->first.c_str(), tmp);
-		    }
-		}
-		
-		return tmp;
-	}
 	
 	/*
 		This function is used to draw relational plots
@@ -324,7 +324,7 @@ class Seaborn
 		Parameters:
 		:x: string - Column Name in dataset - Must be numeric
 		:y: string - Column Name in dataset - Must be numeric
-		:keywords: map<string, string> - Key-Value Pairs of additional arguments of type string
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
 		
     	:return: bool - Result of operation (Success or Failure)
 	*/
@@ -338,18 +338,18 @@ class Seaborn
 		
 		PyObject* kwargs = PyDict_New();
 		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
-	    {
-	    	PyObject* data = getArgData(it->second);
-	        PyDict_SetItemString(kwargs, it->first.c_str(), data);
-	    }
+	    	{
+	    		PyObject* data = getArgData(it->second);	
+	        	PyDict_SetItemString(kwargs, it->first.c_str(), data);
+	    	}
 	    
-	    if(!dataset)
-	    {
-	    	cout<<"\nDataset not loaded\n";
-	    	return false;
+	    	if(!dataset)
+	    	{
+	    		cout<<"\nDataset not loaded\n";
+	    		return false;
 		}
 		
-	    PyDict_SetItemString(kwargs, "data", dataset);
+	    	PyDict_SetItemString(kwargs, "data", dataset);
 		
 		PyObject* res = PyObject_Call(pyrelplot, args, kwargs);
 		if(!res)
@@ -358,13 +358,68 @@ class Seaborn
 		}
 		
 		Py_DECREF(args);
-    	Py_DECREF(kwargs);
-    	if(res)
+	    	Py_DECREF(kwargs);
+	    	if(res)
 			Py_DECREF(res);
     	
-    	return res;
+	    	return res;
 	}
 	
 	//=================================================================================================================
+	//=================================================================================================================
+
+	//=================================================================================================================
+	//CATEGORICAL PLOTS
+	//https://seaborn.pydata.org/generated/seaborn.relplot.html#seaborn.catplot
+	
+	
+	/*
+		This function is used to draw relational plots
+		The dataset should be loaded through the loadData() function
+		String arguments can be passed through the map<string, string>
+		Other arguments have to be set manually through setter functions
+		
+		Parameters:
+		:x: string - Column Name in dataset - Must be numeric
+		:y: string - Column Name in dataset - Must be numeric
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
+		
+    	:return: bool - Result of operation (Success or Failure)
+	*/
+	bool catplot(const string x,const string y,const map<string, Storage>& keywords)
+	{
+
+		PyObject* pycatplot= safe_import(seabornLib,"catplot");
+		PyObject* args = PyTuple_New(2);
+		PyTuple_SetItem(args, 0, PyUnicode_FromString(x.c_str()));
+		PyTuple_SetItem(args, 1, PyUnicode_FromString(y.c_str()));
+
+		PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+		{
+	    		PyObject* data = getArgData(it->second);	
+			PyDict_SetItemString(kwargs, it->first.c_str(), data);
+		}   
+		PyDict_SetItemString(kwargs, "data", dataset);
+		if(!dataset)
+	    	{
+	    		cout<<"\nDataset not loaded\n";
+	    		return false;
+		}
+			
+		PyObject* res = PyObject_Call(pycatplot, args, kwargs);
+		if(!res)
+			PyErr_Print();
+		else
+				
+		Py_DECREF(args);
+	    	Py_DECREF(kwargs);
+	    	if(res)
+			Py_DECREF(res);
+	    	return res;	
+		
+	}
+	//=================================================================================================================
+
 };
 
