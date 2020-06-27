@@ -339,7 +339,7 @@ class Seaborn
 		PyObject* kwargs = PyDict_New();
 		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
 	    {
-	    	PyObject* data = getArgData(it->second);	
+	    	PyObject* data = getArgData(it->second);
 	        PyDict_SetItemString(kwargs, it->first.c_str(), data);
 	    }
 	    
