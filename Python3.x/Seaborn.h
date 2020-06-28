@@ -19,9 +19,11 @@ class Storage
 	bool b;
 	double *li;
 	string *sa;
+	bool *bl;
 	map<string, Storage> m;
 	
 	string val;
+	bool type;
 		
 	public:
 		
@@ -34,6 +36,7 @@ class Storage
 			b = false;
 			li = new double[1];
 			sa = new string[1];
+			bl = new bool[1];
 		}
 			
 		void setString(string s)
@@ -45,6 +48,7 @@ class Storage
 			b = false;
 			li = new double[1];
 			sa = new string[1];
+			bl = new bool[1];
 		}
 		
 		void setBool(bool b)
@@ -56,31 +60,51 @@ class Storage
 			s = "";
 			li = new double[1];
 			sa = new string[1];
+			bl = new bool[1];
 		}
 		
-		void setDoubleArray(double *li, int n)
+		void setDoubleArray(double *li, int n, bool t = true)
 		{
 			this->li = new double[n];
 			copy(li, li + n, this->li);
 			val = "intarr";
+			type = t;
 			this->n = n;
 			
 			i = 0;
 			s = "";
 			b = false;
 			sa = new string[1];
+			bl = new bool[1];
 		}
 		
-		void setStringArray(string *sa, int n)
+		void setStringArray(string *sa, int n, bool t = true)
 		{
 			this->sa = new string[n];
 			copy(sa, sa + n, this->sa);
 			val = "strarr";
+			type = t;
 			this->n = n;
 			
 			i = 0;
 			s = "";
 			b = false;
+			li = new double[1];
+			bl = new bool[1];
+		}
+		
+		void setBoolArray(bool *bl, int n, bool t = true)
+		{
+			this->bl = new bool[n];
+			copy(bl, bl + n, this->bl);
+			val = "boolarr";
+			type = t;
+			this->n = n;
+			
+			i = 0;
+			s = "";
+			b = false;
+			sa = new string[1];
 			li = new double[1];
 		}
 		
@@ -93,9 +117,10 @@ class Storage
 			b = false;
 			li = new double[1];
 			sa = new string[1];
+			bl = new bool[1];
 		}
 		
-		void setkwargs(string str, map<string, Storage> m)
+		void setDict(map<string, Storage> m)
 		{
 			this->m = m;
 			val = "kwargs";
@@ -105,6 +130,7 @@ class Storage
 			b = false;
 			li = new double[1];
 			sa = new string[1];
+			bl = new bool[1];
 		}
 		
 		int getN() const
@@ -137,7 +163,12 @@ class Storage
 			return sa;
 		}
 		
-		map<string, Storage> getkwargs() const
+		bool* getBoolArray() const
+		{
+			return bl;
+		}
+		
+		map<string, Storage> getDict() const
 		{
 			return m;
 		}
@@ -145,6 +176,11 @@ class Storage
 		string getVal() const
 		{
 			return val;
+		}
+		
+		bool getType() const
+		{
+			return type;
 		}
 };
 
@@ -189,21 +225,70 @@ class Seaborn
 		{
 			int n = store.getN();
 			double* t = store.getDoubleArray();
-			tmp = PyTuple_New(n);
-			for(int i=0; i<n; i++)
+			if(store.getType())
 			{
-		        PyTuple_SetItem(tmp, i, PyFloat_FromDouble(t[i]));
-	        }
+				tmp = PyList_New(n);
+				for(int i=0; i<n; i++)
+	       	    {
+		        	PyList_SetItem(tmp, i, PyFloat_FromDouble(t[i]));
+		    	}
+			}
+			else
+			{
+				tmp = PyTuple_New(n);
+				for(int i=0; i<n; i++)
+				{
+			        PyTuple_SetItem(tmp, i, PyFloat_FromDouble(t[i]));
+		        }
+	    	}
 		}
 		else if(store.getVal().compare("strarr") == 0)
 		{
 			int n = store.getN();
 			string* t = store.getStringArray();
-			tmp = PyList_New(n);
-			for(int i=0; i<n; i++)
-       	    {
-	        	PyList_SetItem(tmp, i, PyUnicode_FromString(t[i].c_str()));
-	    	}
+			if(store.getType())
+			{
+				tmp = PyList_New(n);
+				for(int i=0; i<n; i++)
+	       	    {
+		        	PyList_SetItem(tmp, i, PyUnicode_FromString(t[i].c_str()));
+		    	}
+		    }
+		    else
+		    {
+		    	tmp = PyTuple_New(n);
+				for(int i=0; i<n; i++)
+				{
+			        PyTuple_SetItem(tmp, i, PyUnicode_FromString(t[i].c_str()));
+		        }
+			}
+		}
+		else if(store.getVal().compare("boolarr") == 0)
+		{
+			int n = store.getN();
+			bool* t = store.getBoolArray();
+			if(store.getType())
+			{
+				tmp = PyList_New(n);
+				for(int i=0; i<n; i++)
+	       	    {
+	       	    	if(t[i])
+		        		PyList_SetItem(tmp, i, Py_True);
+		        	else
+		        		PyList_SetItem(tmp, i, Py_False);
+		    	}
+		    }
+		    else
+		    {
+		    	tmp = PyTuple_New(n);
+				for(int i=0; i<n; i++)
+	       	    {
+	       	    	if(t[i])
+		        		PyTuple_SetItem(tmp, i, Py_True);
+		        	else
+		        		PyTuple_SetItem(tmp, i, Py_False);
+		    	}
+			}
 		}
 		else if(store.getVal().compare("func") == 0)
 		{
@@ -222,7 +307,7 @@ class Seaborn
 		else if(store.getVal().compare("kwargs") == 0)
 		{
 			tmp = PyDict_New();
-			map<string, Storage> val = store.getkwargs();
+			map<string, Storage> val = store.getDict();
 			for(map<string, Storage>::const_iterator i = val.begin(); i != val.end(); ++i)
 	        {
 	    		PyObject* tmp = getArgData(i->second);
@@ -376,7 +461,6 @@ class Seaborn
 	}
 	
 	//=================================================================================================================
-	//=================================================================================================================
 
 	//=================================================================================================================
 	//CATEGORICAL PLOTS
@@ -433,5 +517,58 @@ class Seaborn
 	
 	//=================================================================================================================
 
+	//=================================================================================================================
+	//RELATIONAL PLOTS
+	//https://seaborn.pydata.org/generated/seaborn.distplot.html#seaborn.distplot
+	
+	/*
+		This function is used to flexibly plot a univariate distribution of observations.
+		The dataset should be loaded through the loadData() function
+		
+		Parameters:
+		:x: string - Column Name in dataset - Must be numeric
+		:y: string - Column Name in dataset - Must be numeric
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
+		
+    	:return: bool - Result of operation (Success or Failure)
+	*/
+	bool distplot(const string x, const string y, const map<string, Storage>& keywords = map<string, Storage>())
+	{
+		PyObject* pyrelplot = safe_import(seabornLib,"relplot");
+		
+		PyObject* args = PyTuple_New(2);
+		PyTuple_SetItem(args, 0, PyUnicode_FromString(x.c_str()));
+		PyTuple_SetItem(args, 1, PyUnicode_FromString(y.c_str()));
+		
+		PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+    	{
+    		PyObject* data = getArgData(it->second);	
+        	PyDict_SetItemString(kwargs, it->first.c_str(), data);
+    	}
+    
+    	if(!dataset)
+    	{
+    		cout<<"\nDataset not loaded\n";
+    		return false;
+		}
+		
+	    PyDict_SetItemString(kwargs, "data", dataset);
+		
+		PyObject* res = PyObject_Call(pyrelplot, args, kwargs);
+		if(!res)
+		{
+			PyErr_Print();
+		}
+		
+		Py_DECREF(args);
+    	Py_DECREF(kwargs);
+    	if(res)
+			Py_DECREF(res);
+	
+    	return res;
+	}
+	
+	//=================================================================================================================
 };
 
