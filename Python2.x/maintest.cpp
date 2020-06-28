@@ -104,7 +104,7 @@ void regplotExample(Seaborn &s, Storage &store)
 	bool rel = s.regplot("total_bill", "tip", args);
 		
 	//Save Graph
-	s.saveGraph("lmplot");
+	s.saveGraph("regplot");
 }
 
 void residplotExample(Seaborn &s, Storage &store)
