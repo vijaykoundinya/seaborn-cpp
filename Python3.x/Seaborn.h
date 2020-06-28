@@ -310,8 +310,8 @@ class Seaborn
 			map<string, Storage> val = store.getDict();
 			for(map<string, Storage>::const_iterator i = val.begin(); i != val.end(); ++i)
 	        {
-	    		PyObject* tmp = getArgData(i->second);
-	        	PyDict_SetItemString(tmp, i->first.c_str(), tmp);
+	    		PyObject* tmp1 = getArgData(i->second);
+	        	PyDict_SetItemString(tmp, i->first.c_str(), tmp1);
 	        }
 		}
 		
@@ -425,7 +425,7 @@ class Seaborn
 	*/
 	bool relplot(const string x, const string y, const map<string, Storage>& keywords = map<string, Storage>())
 	{
-		PyObject* pyrelplot = safe_import(seabornLib,"relplot");
+		PyObject* pyrelplot = safe_import(seabornLib, "relplot");
 		
 		PyObject* args = PyTuple_New(2);
 		PyTuple_SetItem(args, 0, PyUnicode_FromString(x.c_str()));
@@ -482,6 +482,7 @@ class Seaborn
 	bool catplot(const string x,const string y,const map<string, Storage>& keywords = map<string, Storage>())
 	{
 		PyObject* pycatplot= safe_import(seabornLib, "catplot");
+		
 		PyObject* args = PyTuple_New(2);
 		PyTuple_SetItem(args, 0, PyUnicode_FromString(x.c_str()));
 		PyTuple_SetItem(args, 1, PyUnicode_FromString(y.c_str()));
@@ -518,27 +519,23 @@ class Seaborn
 	//=================================================================================================================
 
 	//=================================================================================================================
-	//RELATIONAL PLOTS
+	//DISTRIBUTION PLOTS
 	//https://seaborn.pydata.org/generated/seaborn.distplot.html#seaborn.distplot
 	
 	/*
 		This function is used to flexibly plot a univariate distribution of observations.
-		The dataset should be loaded through the loadData() function
 		
 		Parameters:
-		:x: string - Column Name in dataset - Must be numeric
-		:y: string - Column Name in dataset - Must be numeric
+		:a: Storage Class - Observed data
 		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
 		
     	:return: bool - Result of operation (Success or Failure)
 	*/
-	bool distplot(const string x, const string y, const map<string, Storage>& keywords = map<string, Storage>())
+	bool distplot(const Storage a, const map<string, Storage>& keywords = map<string, Storage>())
 	{
-		PyObject* pyrelplot = safe_import(seabornLib,"relplot");
+		PyObject* pydistplot = safe_import(seabornLib, "distplot");
 		
-		PyObject* args = PyTuple_New(2);
-		PyTuple_SetItem(args, 0, PyUnicode_FromString(x.c_str()));
-		PyTuple_SetItem(args, 1, PyUnicode_FromString(y.c_str()));
+		PyObject* args = getArgData(a);
 		
 		PyObject* kwargs = PyDict_New();
 		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
@@ -546,17 +543,15 @@ class Seaborn
     		PyObject* data = getArgData(it->second);	
         	PyDict_SetItemString(kwargs, it->first.c_str(), data);
     	}
-    
-    	if(!dataset)
-    	{
-    		cout<<"\nDataset not loaded\n";
-    		return false;
-		}
+    	cout<<"\n"<<PyUnicode_AsUTF8(PyObject_Repr(kwargs))<<"\n";
 		
-	    PyDict_SetItemString(kwargs, "data", dataset);
+		PyObject* res;
+		//if(PyLong_AsLong(PyLong_FromSsize_t(PyDict_Size(kwargs))) == 0)
+		//	res = PyObject_Call(pydistplot, args, Py_None);
+		//else
+		res = PyObject_Call(pydistplot, args, kwargs);
 		
-		PyObject* res = PyObject_Call(pyrelplot, args, kwargs);
-		if(!res)
+		if(!res)	
 		{
 			PyErr_Print();
 		}
