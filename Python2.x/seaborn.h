@@ -95,7 +95,7 @@ class Storage
 			sa = new string[1];
 		}
 		
-		void setkwargs(string str, map<string, Storage> m)
+		void setkwargs(map<string, Storage> m)
 		{
 			this->m = m;
 			val = "kwargs";
@@ -173,6 +173,7 @@ class Seaborn
 		}
 		else if(store.getVal().compare("int") == 0)
     		{
+			cout<<store.getDouble();
     			tmp = PyFloat_FromDouble(store.getDouble());
 		}
 		else if(store.getVal().compare("bool") == 0)
@@ -221,7 +222,7 @@ class Seaborn
     			tmp = PyDict_New();
     			map<string, Storage> val = store.getkwargs();
     			for(map<string, Storage>::const_iterator i = val.begin(); i != val.end(); ++i)
-		        {
+		        {	
 		    		PyObject* tmp = getArgData(i->second);
 		    	        PyDict_SetItemString(tmp, i->first.c_str(), tmp);
 		    	}
@@ -365,7 +366,7 @@ public:
 
 	//=================================================================================================================
 	//CATEGORICAL PLOTS
-	//https://seaborn.pydata.org/generated/seaborn.relplot.html#seaborn.catplot
+	//https://seaborn.pydata.org/generated/seaborn.catplot.html#seaborn.catplot
 	
 	
 	/*
@@ -415,6 +416,158 @@ public:
 		
 	}
 	//=================================================================================================================
+
+
+	//=================================================================================================================
+	//REGRESSION PLOTS
+	//https://seaborn.pydata.org/tutorial/regression.html
+	
+	
+	/*
+		This function is used to draw regression plots
+		The dataset should be loaded through the loadData() function
+		String arguments can be passed through the map<string, Storage>
+		Other arguments have to be set manually through setter functions
+		
+		Parameters:
+		:x: string - Column Name in dataset - Must be numeric
+		:y: string - Column Name in dataset - Must be numeric
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
+		
+    	:return: bool - Result of operation (Success or Failure)
+	*/
+	bool lmplot(const string x,const string y,const map<string, Storage>& keywords)
+	{
+
+		PyObject* pylmplot= safe_import(seabornLib,"lmplot");
+		PyObject* args = PyTuple_New(2);
+		PyTuple_SetItem(args, 0, PyString_FromString(x.c_str()));
+		PyTuple_SetItem(args, 1, PyString_FromString(y.c_str()));
+
+		PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+		{
+	    		PyObject* data = getArgData(it->second);	
+			PyDict_SetItemString(kwargs, it->first.c_str(), data);
+		}   
+		PyDict_SetItemString(kwargs, "data", dataset);
+		if(!dataset)
+	    	{
+	    		cout<<"\nDataset not loaded\n";
+	    		return false;
+		}
+			
+		PyObject* res = PyObject_Call(pylmplot, args, kwargs);
+		if(!res)
+			PyErr_Print();
+		else
+				
+		Py_DECREF(args);
+	    	Py_DECREF(kwargs);
+	    	if(res)
+			Py_DECREF(res);
+	    	return res;	
+		
+	}
+
+
+	/*
+		This function is used to draw regression plots
+		The dataset should be loaded through the loadData() function
+		String arguments can be passed through the map<string, Storage>
+		Other arguments have to be set manually through setter functions
+		
+		Parameters:
+		:x: string - Column Name in dataset - Must be numeric
+		:y: string - Column Name in dataset - Must be numeric
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
+		
+    	:return: bool - Result of operation (Success or Failure)
+	*/
+	bool regplot(const string x,const string y,const map<string, Storage>& keywords)
+	{
+
+		PyObject* pyregplot= safe_import(seabornLib,"regplot");
+		PyObject* args = PyTuple_New(2);
+		PyTuple_SetItem(args, 0, PyString_FromString(x.c_str()));
+		PyTuple_SetItem(args, 1, PyString_FromString(y.c_str()));
+
+		PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+		{
+	    		PyObject* data = getArgData(it->second);	
+			PyDict_SetItemString(kwargs, it->first.c_str(), data);
+		}   
+		PyDict_SetItemString(kwargs, "data", dataset);
+		if(!dataset)
+	    	{
+	    		cout<<"\nDataset not loaded\n";
+	    		return false;
+		}
+			
+		PyObject* res = PyObject_Call(pyregplot, args, kwargs);
+		if(!res)
+			PyErr_Print();
+		else
+				
+		Py_DECREF(args);
+	    	Py_DECREF(kwargs);
+	    	if(res)
+			Py_DECREF(res);
+	    	return res;	
+		
+	}
+/*
+		This function is used to draw regression plots
+		The dataset should be loaded through the loadData() function
+		String arguments can be passed through the map<string, Storage>
+		Other arguments have to be set manually through setter functions
+		
+		Parameters:
+		:x: string - Column Name in dataset - Must be numeric
+		:y: string - Column Name in dataset - Must be numeric
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
+		
+    	:return: bool - Result of operation (Success or Failure)
+	*/
+	bool residplot(const string x,const string y,const map<string, Storage>& keywords)
+	{
+
+		PyObject* pyresidplot= safe_import(seabornLib,"residplot");
+		PyObject* args = PyTuple_New(2);
+		PyTuple_SetItem(args, 0, PyString_FromString(x.c_str()));
+		PyTuple_SetItem(args, 1, PyString_FromString(y.c_str()));
+
+		PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+		{
+	    		PyObject* data = getArgData(it->second);	
+			PyDict_SetItemString(kwargs, it->first.c_str(), data);
+		}   
+		PyDict_SetItemString(kwargs, "data", dataset);
+		if(!dataset)
+	    	{
+	    		cout<<"\nDataset not loaded\n";
+	    		return false;
+		}
+			
+		PyObject* res = PyObject_Call(pyresidplot, args, kwargs);
+		if(!res)
+			PyErr_Print();
+		else
+				
+		Py_DECREF(args);
+	    	Py_DECREF(kwargs);
+	    	if(res)
+			Py_DECREF(res);
+	    	return res;	
+		
+	}
+
+
+
+	//=================================================================================================================
+
 
 };
 
