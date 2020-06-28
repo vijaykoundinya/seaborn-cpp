@@ -1,6 +1,7 @@
 #include "seaborn.h"
 #include<iostream>
 #include<map>
+#include<python2.7/Python.h>
 using namespace std;
 void relplotExample(Seaborn &s, Storage &store)
 {
@@ -112,19 +113,30 @@ void residplotExample(Seaborn &s, Storage &store)
 	//Pass CSV dataset path
 	bool ret = s.loadData("anscombe.csv");
 	
-	//Replot example
 	//The arguments are completely optional
-	map<string, Storage> args,args1;
-	//Storage store1;
-	//store1.setDouble(80);
-	//args1["s"] = store1;
-	//store.setkwargs(args1);
-	//args["scatter_kws"]  = store;
+	map<string, Storage> args;
 	//Call function relplot with x, y and arguments (args is optional)
 	bool rel = s.residplot("x", "y", args);
 		
 	//Save Graph
 	s.saveGraph("residplot");
+}
+
+void distplotExample(Seaborn &s, Storage &store)
+{
+	//Pass dataset as a list object
+	PyObject* list =PyList_New(5);
+	for(int i=0; i<5; i++)
+	{
+	        PyTuple_SetItem(list, i, PyFloat_FromDouble(i));
+	}
+	map<string, Storage> args;
+	store.setString("y");
+	args["color"] = store;
+
+	bool rel = s.distplot(list,args);
+	//Save Graph
+	s.saveGraph("distplot");
 }
 int main()
 {
@@ -132,15 +144,17 @@ int main()
 	Seaborn s;
 	Storage store;
 	
-	relplotExample(s, store);
+	//relplotExample(s, store);
 	
-	catplotExample(s, store);
+	//catplotExample(s, store);
 	
-	lmplotExample(s, store);
+	//lmplotExample(s, store);
 
-	regplotExample(s, store);
+	//regplotExample(s, store);
 
-	residplotExample(s, store);
+	//residplotExample(s, store);
+
+	distplotExample(s, store);
 	
 	return 0;
 }

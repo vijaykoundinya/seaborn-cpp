@@ -10,7 +10,6 @@
 #include <map>
 
 using namespace std;
-
 class Storage
 {
 	int n;
@@ -19,9 +18,11 @@ class Storage
 	bool b;
 	double *li;
 	string *sa;
+	bool *bl;
 	map<string, Storage> m;
 	
 	string val;
+	bool type;
 		
 	public:
 		
@@ -34,6 +35,7 @@ class Storage
 			b = false;
 			li = new double[1];
 			sa = new string[1];
+			bl = new bool[1];
 		}
 			
 		void setString(string s)
@@ -45,6 +47,7 @@ class Storage
 			b = false;
 			li = new double[1];
 			sa = new string[1];
+			bl = new bool[1];
 		}
 		
 		void setBool(bool b)
@@ -56,31 +59,51 @@ class Storage
 			s = "";
 			li = new double[1];
 			sa = new string[1];
+			bl = new bool[1];
 		}
 		
-		void setDoubleArray(double *li, int n)
+		void setDoubleArray(double *li, int n, bool t = true)
 		{
 			this->li = new double[n];
 			copy(li, li + n, this->li);
 			val = "intarr";
+			type = t;
 			this->n = n;
 			
 			i = 0;
 			s = "";
 			b = false;
 			sa = new string[1];
+			bl = new bool[1];
 		}
 		
-		void setStringArray(string *sa, int n)
+		void setStringArray(string *sa, int n, bool t = true)
 		{
 			this->sa = new string[n];
 			copy(sa, sa + n, this->sa);
 			val = "strarr";
+			type = t;
 			this->n = n;
 			
 			i = 0;
 			s = "";
 			b = false;
+			li = new double[1];
+			bl = new bool[1];
+		}
+		
+		void setBoolArray(bool *bl, int n, bool t = true)
+		{
+			this->bl = new bool[n];
+			copy(bl, bl + n, this->bl);
+			val = "boolarr";
+			type = t;
+			this->n = n;
+			
+			i = 0;
+			s = "";
+			b = false;
+			sa = new string[1];
 			li = new double[1];
 		}
 		
@@ -93,9 +116,10 @@ class Storage
 			b = false;
 			li = new double[1];
 			sa = new string[1];
+			bl = new bool[1];
 		}
 		
-		void setkwargs(map<string, Storage> m)
+		void setDict(map<string, Storage> m)
 		{
 			this->m = m;
 			val = "kwargs";
@@ -105,6 +129,7 @@ class Storage
 			b = false;
 			li = new double[1];
 			sa = new string[1];
+			bl = new bool[1];
 		}
 		
 		int getN() const
@@ -137,7 +162,12 @@ class Storage
 			return sa;
 		}
 		
-		map<string, Storage> getkwargs() const
+		bool* getBoolArray() const
+		{
+			return bl;
+		}
+		
+		map<string, Storage> getDict() const
 		{
 			return m;
 		}
@@ -145,6 +175,11 @@ class Storage
 		string getVal() const
 		{
 			return val;
+		}
+		
+		bool getType() const
+		{
+			return type;
 		}
 };
 class Seaborn
@@ -168,48 +203,96 @@ class Seaborn
 	{
 		PyObject* tmp;
 		if(store.getVal().compare("str") == 0)
-    		{
-    			tmp = PyUnicode_FromString(store.getString().c_str());
+		{	
+			tmp = PyUnicode_FromString(store.getString().c_str());
 		}
 		else if(store.getVal().compare("int") == 0)
-    		{
-			cout<<store.getDouble();
-    			tmp = PyFloat_FromDouble(store.getDouble());
+		{
+			tmp = PyFloat_FromDouble(store.getDouble());
 		}
 		else if(store.getVal().compare("bool") == 0)
-    		{
-    			if(!store.getBool())
-    				tmp = Py_False;
-    			else
-    				tmp = Py_True;
+		{
+			if(!store.getBool())
+				tmp = Py_False;
+			else
+				tmp = Py_True;
 		}
 		else if(store.getVal().compare("intarr") == 0)
-    		{
-    			int n = store.getN();
-    			double* t = store.getDoubleArray();
-    			tmp = PyTuple_New(n);
-			for(int i=0; i<n; i++)
-		        {
-		        	PyTuple_SetItem(tmp, i, PyFloat_FromDouble(t[i]));
+		{
+			int n = store.getN();
+			double* t = store.getDoubleArray();
+			if(store.getType())
+			{
+				tmp = PyList_New(n);
+				for(int i=0; i<n; i++)
+	       	    {
+		        	PyList_SetItem(tmp, i, PyFloat_FromDouble(t[i]));
+		    	}
+			}
+			else
+			{
+				tmp = PyTuple_New(n);
+				for(int i=0; i<n; i++)
+				{
+			        PyTuple_SetItem(tmp, i, PyFloat_FromDouble(t[i]));
 		        }
+	    	}
 		}
 		else if(store.getVal().compare("strarr") == 0)
-    		{
-    			int n = store.getN();
-    			string* t = store.getStringArray();
-    			tmp = PyList_New(n);
-			for(int i=0; i<n; i++)
-		        {
+		{
+			int n = store.getN();
+			string* t = store.getStringArray();
+			if(store.getType())
+			{
+				tmp = PyList_New(n);
+				for(int i=0; i<n; i++)
+	       	    {
 		        	PyList_SetItem(tmp, i, PyUnicode_FromString(t[i].c_str()));
 		    	}
+		    }
+		    else
+		    {
+		    	tmp = PyTuple_New(n);
+				for(int i=0; i<n; i++)
+				{
+			        PyTuple_SetItem(tmp, i, PyUnicode_FromString(t[i].c_str()));
+		        }
+			}
+		}
+		else if(store.getVal().compare("boolarr") == 0)
+		{
+			int n = store.getN();
+			bool* t = store.getBoolArray();
+			if(store.getType())
+			{
+				tmp = PyList_New(n);
+				for(int i=0; i<n; i++)
+	       	    {
+	       	    	if(t[i])
+		        		PyList_SetItem(tmp, i, Py_True);
+		        	else
+		        		PyList_SetItem(tmp, i, Py_False);
+		    	}
+		    }
+		    else
+		    {
+		    	tmp = PyTuple_New(n);
+				for(int i=0; i<n; i++)
+	       	    {
+	       	    	if(t[i])
+		        		PyTuple_SetItem(tmp, i, Py_True);
+		        	else
+		        		PyTuple_SetItem(tmp, i, Py_False);
+		    	}
+			}
 		}
 		else if(store.getVal().compare("func") == 0)
-    		{
+		{
 			string s = store.getString();
 			int pos = s.find_last_of(".");
 			string module = s.substr(0,pos);
 			string funcName = s.substr(pos+1,s.length()-1);
-    			PyObject* functionName = PyUnicode_FromString(module.c_str());
+    		PyObject* functionName = PyUnicode_FromString(module.c_str());
 			PyObject* tmp1 = PyImport_Import(functionName);
 			if(!tmp1)
 			{
@@ -218,14 +301,14 @@ class Seaborn
 			tmp = safe_import(tmp1,funcName);
 		}
 		else if(store.getVal().compare("kwargs") == 0)
-    		{
-    			tmp = PyDict_New();
-    			map<string, Storage> val = store.getkwargs();
-    			for(map<string, Storage>::const_iterator i = val.begin(); i != val.end(); ++i)
-		        {	
-		    		PyObject* tmp = getArgData(i->second);
-		    	        PyDict_SetItemString(tmp, i->first.c_str(), tmp);
-		    	}
+		{
+			tmp = PyDict_New();
+			map<string, Storage> val = store.getDict();
+			for(map<string, Storage>::const_iterator i = val.begin(); i != val.end(); ++i)
+	        {
+	    		PyObject* tmp = getArgData(i->second);
+	        	PyDict_SetItemString(tmp, i->first.c_str(), tmp);
+	        }
 		}
 		
 		return tmp;
@@ -566,6 +649,50 @@ public:
 
 
 
+	//=================================================================================================================
+	//=================================================================================================================
+	//RELATIONAL PLOTS
+	//https://seaborn.pydata.org/generated/seaborn.distplot.html#seaborn.distplot
+	
+	/*
+		This function is used to flexibly plot a univariate distribution of observations.
+		The dataset should be loaded through the loadData() function
+		
+		Parameters:
+		Pyobject
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
+		
+    	:return: bool - Result of operation (Success or Failure)
+	*/
+	bool distplot(PyObject* list, const map<string, Storage>& keywords = map<string, Storage>())
+	{
+		PyObject* pydistplot = safe_import(seabornLib,"distplot");
+		
+		PyObject* args = PyTuple_New(1);
+		PyTuple_SetItem(args, 0, list);
+		
+		PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+	    	{
+	    		PyObject* data = getArgData(it->second);	
+			PyDict_SetItemString(kwargs, it->first.c_str(), data);
+	    	}
+	    
+	    		
+		PyObject* res = PyObject_Call(pydistplot, args, kwargs);
+		if(!res)
+		{
+			PyErr_Print();
+		}
+			
+		Py_DECREF(args);
+	    	Py_DECREF(kwargs);
+	    	if(res)
+			Py_DECREF(res);
+		
+	    	return res;
+	}
+	
 	//=================================================================================================================
 
 
