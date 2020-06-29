@@ -650,26 +650,20 @@ public:
 
 
 	//=================================================================================================================
-	//=================================================================================================================
-	//RELATIONAL PLOTS
-	//https://seaborn.pydata.org/generated/seaborn.distplot.html#seaborn.distplot
-	
 	/*
 		This function is used to flexibly plot a univariate distribution of observations.
-		The dataset should be loaded through the loadData() function
 		
 		Parameters:
-		Pyobject
+		:a: Storage Class - Observed data
 		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
 		
-    	:return: bool - Result of operation (Success or Failure)
+    		:return: bool - Result of operation (Success or Failure)
 	*/
-	bool distplot(PyObject* list, const map<string, Storage>& keywords = map<string, Storage>())
+	bool distplot(const Storage a, const map<string, Storage>& keywords = map<string, Storage>())
 	{
-		PyObject* pydistplot = safe_import(seabornLib,"distplot");
+		PyObject* pydistplot = safe_import(seabornLib, "distplot");
 		
-		PyObject* args = PyTuple_New(1);
-		PyTuple_SetItem(args, 0, list);
+		PyObject* args = getArgData(a);
 		
 		PyObject* kwargs = PyDict_New();
 		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
@@ -677,22 +671,69 @@ public:
 	    		PyObject* data = getArgData(it->second);	
 			PyDict_SetItemString(kwargs, it->first.c_str(), data);
 	    	}
-	    
 	    		
-		PyObject* res = PyObject_Call(pydistplot, args, kwargs);
-		if(!res)
+		PyObject* res;
+		//if(PyLong_AsLong(PyLong_FromSsize_t(PyDict_Size(kwargs))) == 0)
+		//	res = PyObject_Call(pydistplot, args, Py_None);
+		//else
+		res = PyObject_Call(pydistplot, args, kwargs);
+		
+		if(!res)	
 		{
 			PyErr_Print();
 		}
-			
+		
 		Py_DECREF(args);
 	    	Py_DECREF(kwargs);
 	    	if(res)
-			Py_DECREF(res);
+				Py_DECREF(res);
 		
 	    	return res;
 	}
 	
+	//=================================================================================================================
+/*
+		This function is used to draw regression plots
+		The dataset should be loaded through the loadData() function
+		String arguments can be passed through the map<string, Storage>
+		All arguments have to be set manually through setter functions
+		
+		Parameters:
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
+		
+    		:return: bool - Result of operation (Success or Failure)
+	*/
+	bool pairplot(const map<string, Storage>& keywords = map<string, Storage>())
+	{
+
+		PyObject* pypairplot= safe_import(seabornLib,"pairplot");
+		if(!dataset)
+	    	{
+	    		cout<<"\nDataset not loaded\n";
+	    		return false;
+		}
+		PyObject* args = PyTuple_New(1);
+		PyTuple_SetItem(args, 0, dataset);
+
+		PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+		{
+	    		PyObject* data = getArgData(it->second);	
+			PyDict_SetItemString(kwargs, it->first.c_str(), data);
+		}   
+			
+		PyObject* res = PyObject_Call(pypairplot, args, kwargs);
+		if(!res)
+			PyErr_Print();
+		else
+				
+		Py_DECREF(args);
+	    	Py_DECREF(kwargs);
+	    	if(res)
+			Py_DECREF(res);
+	    	return res;	
+		
+	}
 	//=================================================================================================================
 
 
