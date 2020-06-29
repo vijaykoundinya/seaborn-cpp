@@ -662,8 +662,9 @@ public:
 	bool distplot(const Storage a, const map<string, Storage>& keywords = map<string, Storage>())
 	{
 		PyObject* pydistplot = safe_import(seabornLib, "distplot");
-		
-		PyObject* args = getArgData(a);
+
+		PyObject* args = PyTuple_New(1);
+		PyTuple_SetItem(args, 0, getArgData(a));
 		
 		PyObject* kwargs = PyDict_New();
 		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
