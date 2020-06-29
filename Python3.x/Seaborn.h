@@ -190,6 +190,7 @@ class Seaborn
 	PyObject* dataset;
 	PyObject* pandas;
 	PyObject* savefig;
+	PyObject* closefig;
 	PyObject* readCsv;
 	
 	//This function is used to import subfunctions of a header
@@ -347,6 +348,8 @@ class Seaborn
 		
 		savefig = safe_import(matplotlibLib, "savefig");
 		
+		closefig = safe_import(matplotlibLib,"close");
+		
 		readCsv = safe_import(pandas, "read_csv");
 	}
 	
@@ -403,7 +406,19 @@ class Seaborn
 		if(!res)
 		{
 			PyErr_Print();
+			return false;
 		}
+		
+		s = "all";
+		PyTuple_SetItem(pystring, 0, PyUnicode_FromString(s.c_str()));
+		res = PyObject_CallObject(closefig,pystring);
+		if(!res)
+		{
+			PyErr_Print();
+			return false;
+		}		
+		if(res)
+			Py_DECREF(res);
 		
 		return res;
 	}
@@ -469,8 +484,6 @@ class Seaborn
 	/*
 		This function is used to draw categorical plots
 		The dataset should be loaded through the loadData() function
-		String arguments can be passed through the map<string, string>
-		Other arguments have to be set manually through setter functions
 		
 		Parameters:
 		:x: string - Column Name in dataset - Must be numeric
@@ -526,7 +539,7 @@ class Seaborn
 		This function is used to flexibly plot a univariate distribution of observations.
 		
 		Parameters:
-		:a: Storage Class - Observed data
+		:a: Storage Class - array of numbers or array of strings - Observed data
 		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
 		
     	:return: bool - Result of operation (Success or Failure)
@@ -535,7 +548,8 @@ class Seaborn
 	{
 		PyObject* pydistplot = safe_import(seabornLib, "distplot");
 		
-		PyObject* args = getArgData(a);
+		PyObject* args = PyTuple_New(1);
+		PyTuple_SetItem(args, 0, getArgData(a));
 		
 		PyObject* kwargs = PyDict_New();
 		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
@@ -543,21 +557,83 @@ class Seaborn
     		PyObject* data = getArgData(it->second);	
         	PyDict_SetItemString(kwargs, it->first.c_str(), data);
     	}
-    	cout<<"\n"<<PyUnicode_AsUTF8(PyObject_Repr(kwargs))<<"\n";
+    	
+    	//cout<<"\n"<<PyUnicode_AsUTF8(PyObject_Repr(kwargs))<<"\n";
 		
 		PyObject* res;
-		//if(PyLong_AsLong(PyLong_FromSsize_t(PyDict_Size(kwargs))) == 0)
-		//	res = PyObject_Call(pydistplot, args, Py_None);
-		//else
-		res = PyObject_Call(pydistplot, args, kwargs);
-		
+		if(PyLong_AsLong(PyLong_FromSsize_t(PyDict_Size(kwargs))) == 0)
+			res = PyObject_Call(pydistplot, args, Py_None);
+		else
+			res = PyObject_Call(pydistplot, args, kwargs);
+
 		if(!res)	
 		{
 			PyErr_Print();
 		}
 		
 		Py_DECREF(args);
-    	Py_DECREF(kwargs);
+		if(kwargs)
+    		Py_DECREF(kwargs);
+    	if(res)
+			Py_DECREF(res);
+	
+    	return res;
+	}
+	
+	//=================================================================================================================
+	
+	//=================================================================================================================
+	//HEATMAP
+	//https://seaborn.pydata.org/generated/seaborn.heatmap.html#seaborn.heatmap
+	
+	/*
+		Plot rectangular data as a color-encoded matrix.
+		The dataset should be loaded through the loadData() function
+		
+		Parameters:
+		:index: string - Column to use to make new frame’s index
+		:columns: string - Column to use to make new frame’s columns
+		:values: string - Column(s) to use for populating new frame’s values
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
+		
+    	:return: bool - Result of operation (Success or Failure)
+	*/
+	bool heatmap(const string index,const string columns, const string values, const map<string, Storage>& keywords = map<string, Storage>())
+	{
+		PyObject* pyheatmap = safe_import(seabornLib, "heatmap");
+
+		PyObject* data = PyObject_CallMethod(dataset, "pivot", "(sss)", index.c_str(), columns.c_str(), values.c_str());
+		
+		if(!data)	
+		{
+			PyErr_Print();
+		}
+		
+		PyObject* args = PyTuple_New(1);
+		PyTuple_SetItem(args, 0, data);
+		
+		PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+    	{
+    		PyObject* data = getArgData(it->second);	
+        	PyDict_SetItemString(kwargs, it->first.c_str(), data);
+    	}
+    		
+		PyObject* res;
+		if(PyLong_AsLong(PyLong_FromSsize_t(PyDict_Size(kwargs))) == 0)
+			res = PyObject_Call(pyheatmap, args, Py_None);
+		else
+			res = PyObject_Call(pyheatmap, args, kwargs);
+
+		if(!res)	
+		{
+			PyErr_Print();
+		}
+		
+		Py_DECREF(data);
+		Py_DECREF(args);
+		if(kwargs)
+    		Py_DECREF(kwargs);
     	if(res)
 			Py_DECREF(res);
 	

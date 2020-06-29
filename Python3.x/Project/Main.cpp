@@ -8,7 +8,7 @@ using namespace std;
 void relplotExample(Seaborn &s, Storage &store)
 {
 	//Pass CSV dataset path
-	bool ret = s.loadData("test.csv");
+	bool ret = s.loadData("Datasets/tips.csv");
 	
 	//Replot example
 	//The arguments are completely optional
@@ -34,13 +34,13 @@ void relplotExample(Seaborn &s, Storage &store)
 	bool rel = s.relplot("total_bill", "tip", args);
 		
 	//Save Graph
-	s.saveGraph("relplot");
+	s.saveGraph("Outputs/relplot");
 }
 
 void catplotExample(Seaborn &s, Storage &store)
 {
 	//Pass CSV dataset path
-	bool ret = s.loadData("exercise.csv");
+	bool ret = s.loadData("Datasets/exercise.csv");
 	
 	//Catplot example
 	//The arguments are completely optional
@@ -61,7 +61,7 @@ void catplotExample(Seaborn &s, Storage &store)
 	bool cat = s.catplot("time", "pulse", args);
 		
 	//Save Graph
-	s.saveGraph("catplot");
+	s.saveGraph("Outputs/catplot");
 }
 
 void print_map(map<string, Storage> const &m)
@@ -146,7 +146,28 @@ void distplotExample(Seaborn &s, Storage &store)
 	bool dist = s.distplot(ar, args);
 		
 	//Save Graph
-	s.saveGraph("distplot");
+	s.saveGraph("Outputs/distplot");
+}
+
+void heatmapExample(Seaborn &s, Storage &store)
+{
+	//Pass CSV dataset path
+	bool ret = s.loadData("Datasets/flights.csv");
+	
+	//Heatmap example
+	//The arguments are completely optional
+	map<string, Storage> args;
+	store.setString("YlGnBu");
+	args["cmap"] = store;
+		
+	store.setDouble(0.5);
+	args["linewidths"] = store;
+		
+	//Call function catplot with x, y and arguments (args is optional)
+	bool cat = s.heatmap("month", "year", "passengers", args);
+		
+	//Save Graph
+	s.saveGraph("Outputs/heatmap");
 }
 
 int main()
@@ -155,11 +176,13 @@ int main()
 	Seaborn s;
 	Storage store;
 	
-	//relplotExample(s, store);
+	relplotExample(s, store);
 	
-	//catplotExample(s, store);
+	catplotExample(s, store);
 	
 	distplotExample(s, store);
+	
+	heatmapExample(s, store);
 	
 	cout<<"\nDONE\n";
 	getch();
