@@ -187,6 +187,7 @@ class Seaborn
 	PyObject* seabornLib;
 	PyObject* dataset;
 	PyObject* savefig;
+	PyObject* closefig;
 	PyObject* pandas;
 	PyObject* readCsv;
 	PyObject* safe_import(PyObject* lib,const string fn)
@@ -306,8 +307,8 @@ class Seaborn
 			map<string, Storage> val = store.getDict();
 			for(map<string, Storage>::const_iterator i = val.begin(); i != val.end(); ++i)
 	        {
-	    		PyObject* tmp = getArgData(i->second);
-	        	PyDict_SetItemString(tmp, i->first.c_str(), tmp);
+	    		PyObject* tmp1 = getArgData(i->second);
+	        	PyDict_SetItemString(tmp, i->first.c_str(), tmp1);
 	        }
 		}
 		
@@ -331,6 +332,7 @@ public:
 			PyErr_Print();
 		}
 		savefig = safe_import(matplotlibLib,"savefig");
+		closefig = safe_import(matplotlibLib,"close");
 		PyObject* pandasName = PyString_FromString("pandas");
 		pandas = PyImport_Import(pandasName);
 		if(!pandas)
@@ -385,8 +387,18 @@ public:
 		if(!res)
 		{
 			PyErr_Print();
+			return false;
 		}
-		
+		s = "all";
+		PyTuple_SetItem(pystring, 0, PyUnicode_FromString(s.c_str()));
+		res = PyObject_CallObject(closefig,pystring);
+		if(!res)
+		{
+			PyErr_Print();
+			return false;
+		}		
+		if(res)
+			Py_DECREF(res);
 		return res;
 	}
 	

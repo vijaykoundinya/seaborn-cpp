@@ -150,7 +150,7 @@ void distplotExample(Seaborn &s, Storage &store)
 	map<string, Storage> args;
 	store.setBool(true);
 	args["rug"] = store;
-	/*
+	
 	//rug_kws
 	Storage kws;
 	map<string, Storage> kw_args;
@@ -191,7 +191,7 @@ void distplotExample(Seaborn &s, Storage &store)
 	kws.setDict(kw_args);
 	args["hist_kws"] = kws;
 	kw_args.clear();
-	*/
+	
 	//Call function relplot with 'a' and arguments (args is optional)
 	bool dist = s.distplot(ar, args);
 		
@@ -241,20 +241,21 @@ int main()
 	//Initialise Seaborn
 	Seaborn s;
 	Storage store;
-	//relplotExample(s, store);
 	
-	//catplotExample(s, store);
+	relplotExample(s, store);
 	
-	//lmplotExample(s, store);
+	catplotExample(s, store);
+	
+	lmplotExample(s, store);
 
-	//regplotExample(s, store);
+	regplotExample(s, store);
 
-	//residplotExample(s, store);
+	residplotExample(s, store);
 
 	distplotExample(s, store);
 	
-	//pairplotExample(s, store);
+	pairplotExample(s, store);
 		
-	//jointplotExample(s, store);
+	jointplotExample(s, store);
 	return 0;
 }
