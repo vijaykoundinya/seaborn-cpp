@@ -600,7 +600,7 @@ public:
 	    	return res;	
 		
 	}
-/*
+	/*
 		This function is used to draw regression plots
 		The dataset should be loaded through the loadData() function
 		String arguments can be passed through the map<string, Storage>
@@ -693,7 +693,7 @@ public:
 	
 	//=================================================================================================================
 /*
-		This function is used to draw regression plots
+		This function is used to draw bivariate plots
 		The dataset should be loaded through the loadData() function
 		String arguments can be passed through the map<string, Storage>
 		All arguments have to be set manually through setter functions
@@ -736,6 +736,56 @@ public:
 	}
 	//=================================================================================================================
 
+	/*
+		This function is used to draw bivariate plots
+		The dataset should be loaded through the loadData() function
+		String arguments can be passed through the map<string, Storage>
+		Other arguments have to be set manually through setter functions
+		
+		Parameters:
+		:x: string - Column Name in dataset - Must be numeric
+		:y: string - Column Name in dataset - Must be numeric
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
+		
+    	:return: bool - Result of operation (Success or Failure)
+	*/
+	bool jointplot(const string x,const string y,const map<string, Storage>& keywords)
+	{
 
+		PyObject* pyjointplot= safe_import(seabornLib,"jointplot");
+		PyObject* args = PyTuple_New(2);
+		PyTuple_SetItem(args, 0, PyString_FromString(x.c_str()));
+		PyTuple_SetItem(args, 1, PyString_FromString(y.c_str()));
+
+		PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+		{
+	    		PyObject* data = getArgData(it->second);	
+			PyDict_SetItemString(kwargs, it->first.c_str(), data);
+		}   
+		PyDict_SetItemString(kwargs, "data", dataset);
+		if(!dataset)
+	    	{
+	    		cout<<"\nDataset not loaded\n";
+	    		return false;
+		}
+			
+		PyObject* res = PyObject_Call(pyjointplot, args, kwargs);
+		if(!res)
+			PyErr_Print();
+		else
+				
+		Py_DECREF(args);
+	    	Py_DECREF(kwargs);
+	    	if(res)
+			Py_DECREF(res);
+	    	return res;	
+		
+	}
+
+
+
+	//=================================================================================================================
+	
 };
 

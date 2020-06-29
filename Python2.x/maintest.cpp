@@ -206,6 +206,22 @@ void pairplotExample(Seaborn &s, Storage &store)
 	s.saveGraph("pairplot");
 }
 
+void jointplotExample(Seaborn &s, Storage &store)
+{
+	//Pass CSV dataset path
+	bool ret = s.loadData("test1.csv");
+	
+	//The arguments are completely optional
+	map<string, Storage> args;
+	store.setString("hex");
+	args["kind"] = store;
+	
+	//Call function relplot with x, y and arguments (args is optional)
+	bool rel = s.jointplot("total_bill", "tip", args);
+		
+	//Save Graph
+	s.saveGraph("jointplot");
+}
 int main()
 {
 	//Initialise Seaborn
@@ -224,6 +240,8 @@ int main()
 
 	//distplotExample(s, store);
 	
-	pairplotExample(s, store);
+	//pairplotExample(s, store);
+		
+	jointplotExample(s, store);
 	return 0;
 }
