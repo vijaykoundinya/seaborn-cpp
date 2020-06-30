@@ -6,7 +6,7 @@ using namespace std;
 void relplotExample(Seaborn &s, Storage &store)
 {
 	//Pass CSV dataset path
-	bool ret = s.loadData("test1.csv");
+	bool ret = s.loadData("Datasets/test1.csv");
 	
 	//The arguments are completely optional
 	map<string, Storage> args;
@@ -31,13 +31,13 @@ void relplotExample(Seaborn &s, Storage &store)
 	bool rel = s.relplot("total_bill", "tip", args);
 		
 	//Save Graph
-	s.saveGraph("relplot");
+	s.saveGraph("Outputs/relplot");
 }
 
 void catplotExample(Seaborn &s, Storage &store)
 {
 	//Pass CSV dataset path
-	bool ret = s.loadData("exercise.csv");
+	bool ret = s.loadData("Datasets/exercise.csv");
 	
 	//The arguments are completely optional
 	map<string, Storage> args;
@@ -60,13 +60,13 @@ void catplotExample(Seaborn &s, Storage &store)
 	bool rel = s.catplot("time", "pulse", args);
 		
 	//Save Graph
-	s.saveGraph("catplot");
+	s.saveGraph("Outputs/catplot");
 }
 
 void lmplotExample(Seaborn &s, Storage &store)
 {
 	//Pass CSV dataset path
-	bool ret = s.loadData("test1.csv");
+	bool ret = s.loadData("Datasets/test1.csv");
 	
 	//The arguments are completely optional
 	map<string, Storage> args;
@@ -87,13 +87,13 @@ void lmplotExample(Seaborn &s, Storage &store)
 	bool rel = s.lmplot("total_bill", "tip", args);
 		
 	//Save Graph
-	s.saveGraph("lmplot");
+	s.saveGraph("Outputs/lmplot");
 }
 
 void regplotExample(Seaborn &s, Storage &store)
 {
 	//Pass CSV dataset path
-	bool ret = s.loadData("test1.csv");
+	bool ret = s.loadData("Datasets/test1.csv");
 	
 	//The arguments are completely optional
 	map<string, Storage> args;
@@ -105,13 +105,13 @@ void regplotExample(Seaborn &s, Storage &store)
 	bool rel = s.regplot("total_bill", "tip", args);
 		
 	//Save Graph
-	s.saveGraph("regplot");
+	s.saveGraph("Outputs/regplot");
 }
 
 void residplotExample(Seaborn &s, Storage &store)
 {
 	//Pass CSV dataset path
-	bool ret = s.loadData("anscombe.csv");
+	bool ret = s.loadData("Datasets/anscombe.csv");
 	
 	//The arguments are completely optional
 	map<string, Storage> args;
@@ -119,7 +119,7 @@ void residplotExample(Seaborn &s, Storage &store)
 	bool rel = s.residplot("x", "y", args);
 		
 	//Save Graph
-	s.saveGraph("residplot");
+	s.saveGraph("Outputs/residplot");
 }
 
 void distplotExample(Seaborn &s, Storage &store)
@@ -196,13 +196,13 @@ void distplotExample(Seaborn &s, Storage &store)
 	bool dist = s.distplot(ar, args);
 		
 	//Save Graph
-	s.saveGraph("distplot");
+	s.saveGraph("Outputs/distplot");
 }
 
 void pairplotExample(Seaborn &s, Storage &store)
 {
 	//Pass CSV dataset path
-	bool ret = s.loadData("iris.csv");
+	bool ret = s.loadData("Datasets/iris.csv");
 	
 	//The arguments are completely optional
 	map<string, Storage> args;
@@ -217,13 +217,13 @@ void pairplotExample(Seaborn &s, Storage &store)
 	bool rel = s.pairplot(args);
 		
 	//Save Graph
-	s.saveGraph("pairplot");
+	s.saveGraph("Outputs/pairplot");
 }
 
 void jointplotExample(Seaborn &s, Storage &store)
 {
 	//Pass CSV dataset path
-	bool ret = s.loadData("test1.csv");
+	bool ret = s.loadData("Datasets/test1.csv");
 	
 	//The arguments are completely optional
 	map<string, Storage> args;
@@ -234,7 +234,28 @@ void jointplotExample(Seaborn &s, Storage &store)
 	bool rel = s.jointplot("total_bill", "tip", args);
 		
 	//Save Graph
-	s.saveGraph("jointplot");
+	s.saveGraph("Outputs/jointplot");
+}
+
+void heatmapExample(Seaborn &s, Storage &store)
+{
+	//Pass CSV dataset path
+	bool ret = s.loadData("Datasets/flights.csv");
+	
+	//Heatmap example
+	//The arguments are completely optional
+	map<string, Storage> args;
+	store.setString("YlGnBu");
+	args["cmap"] = store;
+		
+	store.setDouble(0.5);
+	args["linewidths"] = store;
+		
+	//Call function catplot with x, y and arguments (args is optional)
+	bool cat = s.heatmap("month", "year", "passengers", args);
+		
+	//Save Graph
+	s.saveGraph("Outputs/heatmap");
 }
 int main()
 {
@@ -257,5 +278,7 @@ int main()
 	pairplotExample(s, store);
 		
 	jointplotExample(s, store);
+
+	heatmapExample(s, store);
 	return 0;
 }

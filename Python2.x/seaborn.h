@@ -795,10 +795,67 @@ public:
 	    	return res;	
 		
 	}
-
-
-
 	//=================================================================================================================
+//=================================================================================================================
+	//HEATMAP
+	//https://seaborn.pydata.org/generated/seaborn.heatmap.html#seaborn.heatmap
 	
+	/*
+		Plot rectangular data as a color-encoded matrix.
+		The dataset should be loaded through the loadData() function
+		
+		Parameters:
+		:index: string - Column to use to make new frame\92s index
+		:columns: string - Column to use to make new frame\92s columns
+		:values: string - Column(s) to use for populating new frame\92s values
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
+		
+    	:return: bool - Result of operation (Success or Failure)
+	*/
+	bool heatmap(const string index,const string columns, const string values, const map<string, Storage>& keywords = map<string, Storage>())
+	{
+		PyObject* pyheatmap = safe_import(seabornLib, "heatmap");
+
+		PyObject* data = PyObject_CallMethod(dataset, "pivot", "(sss)", index.c_str(), columns.c_str(), values.c_str());
+		
+		if(!data)	
+		{
+			PyErr_Print();
+		}
+		
+		PyObject* args = PyTuple_New(1);
+		PyTuple_SetItem(args, 0, data);
+		
+		PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+	    	{
+	    		PyObject* data = getArgData(it->second);	
+			PyDict_SetItemString(kwargs, it->first.c_str(), data);
+	    	}
+    		
+		PyObject* res;
+		if(PyLong_AsLong(PyLong_FromSsize_t(PyDict_Size(kwargs))) == 0)
+			res = PyObject_Call(pyheatmap, args, Py_None);
+		else
+			res = PyObject_Call(pyheatmap, args, kwargs);
+
+		if(!res)	
+		{
+			PyErr_Print();
+		}
+		
+		Py_DECREF(data);
+		Py_DECREF(args);
+		if(kwargs)
+    		Py_DECREF(kwargs);
+    	if(res)
+			Py_DECREF(res);
+	
+    	return res;
+	}
+	
+	//=================================================================================================================	
+
+
 };
 
