@@ -142,7 +142,7 @@ void distplotExample(Seaborn &s, Storage &store)
 	args["hist_kws"] = kws;
 	kw_args.clear();
 	
-	//Call function relplot with 'a' and arguments (args is optional)
+	//Call function distplot with 'a' and arguments (args is optional)
 	bool dist = s.distplot(ar, args);
 		
 	//Save Graph
@@ -163,11 +163,37 @@ void heatmapExample(Seaborn &s, Storage &store)
 	store.setDouble(0.5);
 	args["linewidths"] = store;
 		
-	//Call function catplot with x, y and arguments (args is optional)
+	//Call function heatmap with x, y and arguments (args is optional)
 	bool cat = s.heatmap("month", "year", "passengers", args);
 		
 	//Save Graph
 	s.saveGraph("Outputs/heatmap");
+}
+
+void clustermapExample(Seaborn &s, Storage &store)
+{
+	//Pass CSV dataset path
+	bool ret = s.loadData("Datasets/iris_modified.csv");
+	
+	//Clustermap example
+	//The arguments are completely optional
+	map<string, Storage> args;
+	store.setBool(false);
+	args["row_cluster"] = store;
+	
+	double dendRatio[2] = { 0.1, 0.2 };
+	store.setDoubleArray(dendRatio, 2, false);
+	args["dendrogram_ratio"] = store;
+	
+	double cbarPos[4] = { 0, 0.2, 0.03, 0.4 };
+	store.setDoubleArray(cbarPos, 4, false);
+	args["cbar_pos"] = store;
+		
+	//Call function clustermap with x, y and arguments (args is optional)
+	bool cat = s.clustermap(args);
+		
+	//Save Graph
+	s.saveGraph("Outputs/clustermap");
 }
 
 int main()
@@ -176,13 +202,15 @@ int main()
 	Seaborn s;
 	Storage store;
 	
-	relplotExample(s, store);
+	//relplotExample(s, store);
 	
-	catplotExample(s, store);
+	//catplotExample(s, store);
 	
-	distplotExample(s, store);
+	//distplotExample(s, store);
 	
-	heatmapExample(s, store);
+	//heatmapExample(s, store);
+	
+	clustermapExample(s, store);
 	
 	cout<<"\nDONE\n";
 	getch();
