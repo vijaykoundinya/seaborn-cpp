@@ -554,7 +554,7 @@ class Seaborn
 		PyObject* kwargs = PyDict_New();
 		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
     	{
-    		PyObject* data = getArgData(it->second);	
+    		PyObject* data = getArgData(it->second);
         	PyDict_SetItemString(kwargs, it->first.c_str(), data);
     	}
     	
@@ -581,6 +581,35 @@ class Seaborn
 	}
 	
 	//=================================================================================================================
+	
+	bool test(const string fname, const map<string, Storage>& keywords = map<string, Storage>())
+	{
+    	PyObject* pytest = safe_import(dataset, fname.c_str());
+    	cout<<"1";
+    	PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+    	{
+    		PyObject* data = getArgData(it->second);	
+        	PyDict_SetItemString(kwargs, it->first.c_str(), data);
+    	}
+		
+		PyObject* data = PyObject_CallObject(pytest, kwargs);
+		cout<<"2";
+		if(!data)
+		{
+			PyErr_Print();
+			return false;
+		}
+		
+		PyObject* o = PyObject_Repr(data);
+		const char* check = PyBytes_AsString(PyUnicode_AsUTF8String(o));
+		
+		cout<<"\n";
+		cout<<check;
+		cout<<"\n";
+		
+		return data;
+	}
 	
 	//=================================================================================================================
 	//HEATMAP

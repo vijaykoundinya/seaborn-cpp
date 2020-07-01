@@ -164,7 +164,7 @@ void heatmapExample(Seaborn &s, Storage &store)
 	args["linewidths"] = store;
 		
 	//Call function heatmap with x, y and arguments (args is optional)
-	bool cat = s.heatmap("month", "year", "passengers", args);
+	bool heat = s.heatmap("month", "year", "passengers", args);
 		
 	//Save Graph
 	s.saveGraph("Outputs/heatmap");
@@ -190,7 +190,7 @@ void clustermapExample(Seaborn &s, Storage &store)
 	args["cbar_pos"] = store;
 		
 	//Call function clustermap with x, y and arguments (args is optional)
-	bool cat = s.clustermap(args);
+	bool cluster = s.clustermap(args);
 		
 	//Save Graph
 	s.saveGraph("Outputs/clustermap");
@@ -210,7 +210,20 @@ int main()
 	
 	//heatmapExample(s, store);
 	
-	clustermapExample(s, store);
+	//clustermapExample(s, store);
+	
+	bool ret = s.loadData("Datasets/flights.csv");
+	map<string, Storage> args;
+	store.setString("month");
+	args["index"] = store;
+	
+	store.setString("year");
+	args["columns"] = store;
+	
+	store.setString("passengers");
+	args["values"] = store;
+	
+	bool heat = s.test("pivot", args);
 	
 	cout<<"\nDONE\n";
 	getch();
