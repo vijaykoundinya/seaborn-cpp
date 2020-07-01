@@ -257,6 +257,32 @@ void heatmapExample(Seaborn &s, Storage &store)
 	//Save Graph
 	s.saveGraph("Outputs/heatmap");
 }
+
+void clustermapExample(Seaborn &s, Storage &store)
+{
+	//Pass CSV dataset path
+	bool ret = s.loadData("Datasets/iris_modified.csv");
+	
+	//Clustermap example
+	//The arguments are completely optional
+	map<string, Storage> args;
+	store.setBool(false);
+	args["row_cluster"] = store;
+	
+	double dendRatio[2] = { 0.1, 0.2 };
+	store.setDoubleArray(dendRatio, 2, false);
+	args["dendrogram_ratio"] = store;
+	
+	double cbarPos[4] = { 0, 0.2, 0.03, 0.4 };
+	store.setDoubleArray(cbarPos, 4, false);
+	args["cbar_pos"] = store;
+		
+	//Call function clustermap with x, y and arguments (args is optional)
+	bool cat = s.clustermap(args);
+		
+	//Save Graph
+	s.saveGraph("Outputs/clustermap");
+}
 int main()
 {
 	//Initialise Seaborn

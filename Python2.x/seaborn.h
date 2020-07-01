@@ -662,6 +662,10 @@ public:
 
 
 	//=================================================================================================================
+	//=================================================================================================================
+	//DISTRIBUTION PLOTS
+	//https://seaborn.pydata.org/generated/seaborn.distplot.html#seaborn.distplot
+	
 	/*
 		This function is used to flexibly plot a univariate distribution of observations.
 		
@@ -796,7 +800,7 @@ public:
 		
 	}
 	//=================================================================================================================
-//=================================================================================================================
+	//=================================================================================================================
 	//HEATMAP
 	//https://seaborn.pydata.org/generated/seaborn.heatmap.html#seaborn.heatmap
 	
@@ -856,6 +860,56 @@ public:
 	
 	//=================================================================================================================	
 
+	//=================================================================================================================
+	
+	//=================================================================================================================
+	//CLUSTERMAP
+	//https://seaborn.pydata.org/generated/seaborn.clustermap.html#seaborn.clustermap
+	
+	/*
+		Plot a matrix dataset as a hierarchically-clustered heatmap.
+		The dataset should be loaded through the loadData() function
+		
+		Parameters:
+		:keywords: map<string, Storage> - Key-Value Pairs of additional arguments of type string
+		
+    	:return: bool - Result of operation (Success or Failure)
+	*/
+	bool clustermap(const map<string, Storage>& keywords = map<string, Storage>())
+	{
+		PyObject* pyclustermap = safe_import(seabornLib, "clustermap");
+		
+		PyObject* args = PyTuple_New(1);
+		PyTuple_SetItem(args, 0, dataset);
+		
+		PyObject* kwargs = PyDict_New();
+		for(map<string, Storage>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+    	{
+    		PyObject* data = getArgData(it->second);	
+        	PyDict_SetItemString(kwargs, it->first.c_str(), data);
+    	}
+    		
+		PyObject* res;
+		if(PyLong_AsLong(PyLong_FromSsize_t(PyDict_Size(kwargs))) == 0)
+			res = PyObject_Call(pyclustermap, args, Py_None);
+		else
+			res = PyObject_Call(pyclustermap, args, kwargs);
+
+		if(!res)	
+		{
+			PyErr_Print();
+		}
+		
+		Py_DECREF(args);
+		if(kwargs)
+    		Py_DECREF(kwargs);
+    	if(res)
+			Py_DECREF(res);
+	
+    	return res;
+	}
+	
+	//=================================================================================================================
 
 };
 
